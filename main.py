@@ -1,3 +1,5 @@
+import math
+
 def PrintBoard(board):
     '''
     Function to print the board's current state, plus the current score.
@@ -112,7 +114,7 @@ def FlipPieces(board, flip, player):
 
 def PromptMove(board, player):
     '''
-    Asks the player to make a move.
+    Asks the (human) player to make a move.
     This function will loop until it receives a valid input.
     '''
     print(player + " player's turn!")
@@ -156,9 +158,9 @@ def IsBoardFull(board):
                 full = False
     return full
 
-def run():
+def RunNoAI():
     '''
-    Sets up and runs the game.
+    Sets up and runs the game for human vs. human.
     '''
     # create 8 by 8 board
     board = []
@@ -177,7 +179,8 @@ def run():
         PrintBoard(board)
 
         # game over!
-        if len(GetPossibleMoves(board, player)) == 0 and len(GetPossibleMoves(board, other_player)) == 0: break
+        if len(GetPossibleMoves(board, player)) == 0 and len(GetPossibleMoves(board, other_player)) == 0:
+            break
 
         tmp = PromptMove(board, player)
         if not tmp == False:
@@ -194,4 +197,133 @@ def run():
     else:
         print("Tie?")
 
-run()
+def RunOneAI():
+    '''
+    Run a game with human vs. AI
+    For demo purposes
+    '''
+    # create 8 by 8 board
+    board = []
+    for x in range(8):
+        board.append([' '] * 8)
+    
+    board[3][3] = 'W'
+    board[3][4] = 'B'
+    board[4][3] = 'B'
+    board[4][4] = 'W'
+
+    player = 'B' # Human
+    other_player = 'W' # AI
+
+    while not IsBoardFull(board):
+        PrintBoard(board)
+
+        # game over!
+        if len(GetPossibleMoves(board, player)) == 0 and len(GetPossibleMoves(board, other_player)) == 0:
+            break
+
+        if player == 'B':
+            tmp = PromptMove(board, player)
+        else:
+            # TODO: Make AI decsision
+            # TODO: Call MakeAIMove
+            raise NotImplementedError
+        if not tmp == False:
+            board = tmp
+            
+        (player, other_player) = (other_player, player)    
+
+    (black, white) = GetScore(board)
+
+    if black > white:
+        print("Black wins!")
+    elif black < white:
+        print("White wins!")
+    else:
+        print("Tie?")
+
+def RunTwoAI():
+    '''
+    Run a game with AI vs. AI
+    For training/testing purposes
+    '''
+    # create 8 by 8 board
+    board = []
+    for x in range(8):
+        board.append([' '] * 8)
+    
+    board[3][3] = 'W'
+    board[3][4] = 'B'
+    board[4][3] = 'B'
+    board[4][4] = 'W'
+
+    player = 'B' 
+    other_player = 'W' 
+
+    while not IsBoardFull(board):
+        PrintBoard(board)
+
+        # game over!
+        if len(GetPossibleMoves(board, player)) == 0 and len(GetPossibleMoves(board, other_player)) == 0:
+            break
+
+        # TODO: Make AI decsision
+        # TODO: Call MakeAIMove
+        raise NotImplementedError
+        if not tmp == False:
+            board = tmp
+            
+        (player, other_player) = (other_player, player)    
+
+    (black, white) = GetScore(board)
+
+    if black > white:
+        print("Black wins!")
+    elif black < white:
+        print("White wins!")
+    else:
+        print("Tie?")
+
+def MakeAIMove(board, player, move):
+    '''
+    Function takes in the decided move from the AI and makes that move
+    AI keeps the moves as column + (row * 10)
+    '''
+
+    # Convert given row and column to 0-7 rows and columns
+    x_move = (move % 10) - 1 # Column
+    y_move = math.floor(move / 10) - 1 # Row
+
+    # Make the move
+    flip = GetPiecesToFlip(board, x_move, y_move, player)
+    board[y_move][x_move] = player
+
+    board = FlipPieces(board, flip, player)
+
+    return board
+
+def PromptGameType():
+    '''
+    Asks the user how many AI they'd like to use, running the appropriate game afterward
+    '''
+    print("Welcome to OTHELLO AI!")
+    print("Type the number for the type of game you'd like to run.")
+    print("0: Human vs. Human")
+    print("1: Human vs. AI")
+    print("2: AI vs. AI")
+    choice = -1
+    while choice != 1:
+        choice = int(input("Your choice: "))
+        if choice == 0:
+            RunNoAI()
+        elif choice == 1:
+            RunOneAI()
+        elif choice == 2:
+            RunTwoAI()
+        else:
+            print("Please enter a valid choice.")
+            choice = -1
+    print("\n") #???
+
+# Run the game!
+PromptGameType()
