@@ -10,3 +10,6 @@ install pipenv inorder to setup your environment with the following commands:
     pipenv install
     pipenv shell
 Now run your code
+
+File format is the game result followed by the game movelist currently. TODO one hot encoding
+game result is 0 for a tie, -1 for a white win, 1 for a black win
