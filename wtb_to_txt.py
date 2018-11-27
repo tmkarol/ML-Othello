@@ -8,9 +8,9 @@ def load_wtb_file(filename):
     dataset = open(filename, "rb").read()
     output = open(filename[:len(filename)-3]+"txt","w")
 
-    header = dataset[:16]
+    header = dataset[:15]
     numberOfRecords = bytes_to_int(header[4:7])
-    body = dataset[17:]
+    body = dataset[16:]
 
     print(numberOfRecords)
 
@@ -28,7 +28,7 @@ def load_wtb_file(filename):
         List of shots 60 Byte []
         '''
         start_index = x * 68
-        end_index = start_index + 67
+        end_index = start_index + 68
         record = body[start_index:end_index]
         if record[6] > 32:
             output.write(str(1))
@@ -37,7 +37,7 @@ def load_wtb_file(filename):
         else:
             output.write(str(-1))
         output.write(' ')
-        for i in range(9,60):
+        for i in range(8,68):
             move = str(record[i])
             output.write(move) #move lists
             output.write(' ')
