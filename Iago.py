@@ -60,10 +60,9 @@ def format_data():
         board[3][4] = 'B'
         board[4][3] = 'B'
         board[4][4] = 'W'
-        # Slice at a random spot, then get nearest black move
-        sliced = moves[1:randint(1, len(moves))]
+        # Walk through each game
         black_turn = true
-        for move in sliced:
+        for move in moves[1:]:
             # Step through the game until final state is achieved
             if black_turn:
                 player = "B"
@@ -73,7 +72,7 @@ def format_data():
             y_move = int(move[0]) # row
             # Check if move is legal. If it's not, that means the player skipped their turn.
             legal_moves = GetPossibleMoves(board, player)
-            if (x_move, y_move) not in possibilites:
+            if (x_move, y_move) not in legal_moves:
                 black_turn = not black_turn
                 if black_turn:
                     player = "B"
@@ -83,10 +82,10 @@ def format_data():
             flip = GetPiecesToFlip(board, x_move, y_move, player)
             board[y_move][x_move] = player
             board = FlipPieces(board, flip, player)
+            # Put the states for black moves in X
+            # Put the states for white moves in Y
+            # TODO
             black_turn = not black_turn
-
-        # Put the states for that slice in X
-        # Put the states for the next move in Y
 
     # Then! Split X and y into train and test
 
