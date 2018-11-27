@@ -326,4 +326,4 @@ def PromptGameType():
     print("\n") #???
 
 # Run the game!
-PromptGameType()
+#PromptGameType()
