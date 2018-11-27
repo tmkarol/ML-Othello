@@ -17,7 +17,7 @@ from main import GetPossibleMoves, GetPiecesToFlip, FlipPieces
 def build_model(X_train, y_test):
     #multilayer model of convolutional 3D layers. Takes an (5,8,8) input. Outputs an (3,8,8)
 
-    model = [ Conv3D(32,kernel_size=(3, 3, 5), padding = 'same', activation='relu', input_shape = (5,8,8,1)),
+    model = [ Conv3D(32,kernel_size=(3, 3, 5), padding = 'same', activation='relu', input_shape = (5,8,8)),
     Conv3D(32,kernel_size=(3, 3, 5), padding = 'same', activation='relu'),
     Conv3D(64,kernel_size=(3, 3, 5), padding = 'same', activation='relu'),
     Conv3D(64,kernel_size=(3, 3, 5), padding = 'same', activation='relu'),
@@ -33,7 +33,7 @@ def build_model(X_train, y_test):
     cnn_model.summary() #to figure out what is in the model
 
     cnn_model.compile(optimizer="adam", loss='mse')
-    cnn_model.fit(X_train.reshape(-1, 5, 8, 8, 1), y_train, epochs=100)
+    cnn_model.fit(X_train.reshape(-1, 5, 8, 8), y_train, epochs=100)
 
     cnn_model.save("trained_model.h5")
 
@@ -98,47 +98,21 @@ def format_data():
                 black_turn = not black_turn
                 if black_turn:
                     player = "B"
-<<<<<<< HEAD
-                else:
-                    player = "W"
-            
-            #build data and targets
-            if player == "B":
-                tempX = np.zeros((5,8,8), int) #same format as final data
+                    tempX = np.zeros((5,8,8), int) #same format as final data
 
-                tempX[0][:][:] = (np.asarray(board) == "B").astype(int)
-                tempX[1][:][:] = (np.asarray(board) == "W").astype(int)
-                tempX[2][:][:] = np.logical_not(np.logical_xor(tempX[0][:][:],tempX[1][:][:]))
-                for a in legal_moves:
-                    tempX[3][a[0]][a[1]]
-                tempX[4][:][:] = black_win
-
-                X.append(tempX)
-
-            elif player == "W":
-                tempy = np.zeros((3,8,8), int)
-                tempy[0][:][:] = (np.asarray(board) == "B").astype(int)
-                tempy[1][:][:] = (np.asarray(board) == "W").astype(int)
-                tempy[2][:][:] = np.logical_not(np.logical_xor(tempy[0][:][:],tempy[1][:][:]))
-
-                y.append(tempy)
-=======
-                    tempX = np.zeros((1,5,8,8), int) #same format as final data
-
-                    tempX[0][0][:][:] = (np.asarray(board) == "B").astype(int)
-                    tempX[0][1][:][:] = (np.asarray(board) == "W").astype(int)
-                    tempX[0][2][:][:] = np.logical_not(np.logical_xor(tempX[0][0][:][:],tempX[0][1][:][:]))
+                    tempX[0][:][:] = (np.asarray(board) == "B").astype(int)
+                    tempX[1][:][:] = (np.asarray(board) == "W").astype(int)
+                    tempX[2][:][:] = np.logical_not(np.logical_xor(tempX[0][:][:],tempX[1][:][:]))
                     for a in legal_moves:
-                        tempX[0][3][a[0]][a[1]]
-                    tempX[0][4][:][:] = black_win
+                        tempX[3][a[0]][a[1]]
+                    tempX[4][:][:] = black_win
 
-                    tempy = np.zeros((1,3,8,8), int)
-                    tempy[0][0][:][:] = (np.asarray(board) == "B").astype(int)
-                    tempy[0][1][:][:] = (np.asarray(board) == "W").astype(int)
-                    tempy[0][2][:][:] = np.logical_not(np.logical_xor(tempy[0][0][:][:],tempy[0][1][:][:]))
+                    tempy = np.zeros((3,8,8), int)
+                    tempy[0][:][:] = (np.asarray(board) == "B").astype(int)
+                    tempy[1][:][:] = (np.asarray(board) == "W").astype(int)
+                    tempy[2][:][:] = np.logical_not(np.logical_xor(tempy[0][:][:],tempy[1][:][:]))
 
                     y.append(tempy)
-
                     X.append(tempX)
                 else:
                     player = "W"
@@ -146,26 +120,24 @@ def format_data():
                 #Else, it's a legal move
                 #build data and targets
                 if player == "B":
-                    tempX = np.zeros((1,5,8,8), int) #same format as final data
+                    tempX = np.zeros((5,8,8), int) #same format as final data
 
-                    tempX[0][0][:][:] = (np.asarray(board) == "B").astype(int)
-                    tempX[0][1][:][:] = (np.asarray(board) == "W").astype(int)
-                    tempX[0][2][:][:] = np.logical_not(np.logical_xor(tempX[0][0][:][:],tempX[0][1][:][:]))
+                    tempX[0][:][:] = (np.asarray(board) == "B").astype(int)
+                    tempX[1][:][:] = (np.asarray(board) == "W").astype(int)
+                    tempX[2][:][:] = np.logical_not(np.logical_xor(tempX[0][:][:],tempX[1][:][:]))
                     for a in legal_moves:
-                        tempX[0][3][a[0]][a[1]]
-                    tempX[0][4][:][:] = black_win
+                        tempX[3][a[0]][a[1]]
+                    tempX[4][:][:] = black_win
 
                     X.append(tempX)
 
                 elif player == "W":
-                    tempy = np.zeros((1,3,8,8), int)
-                    tempy[0][0][:][:] = (np.asarray(board) == "B").astype(int)
-                    tempy[0][1][:][:] = (np.asarray(board) == "W").astype(int)
-                    tempy[0][2][:][:] = np.logical_not(np.logical_xor(tempy[0][0][:][:],tempy[0][1][:][:]))
+                    tempy = np.zeros((3,8,8), int)
+                    tempy[0][:][:] = (np.asarray(board) == "B").astype(int)
+                    tempy[1][:][:] = (np.asarray(board) == "W").astype(int)
+                    tempy[2][:][:] = np.logical_not(np.logical_xor(tempy[0][:][:],tempy[1][:][:]))
 
                     y.append(tempy)
-
->>>>>>> 8acd288863e6d8eb412ba882bce1c7d1f6d737b6
 
             # Continue through the game
             flip = GetPiecesToFlip(board, x_move, y_move, player)
