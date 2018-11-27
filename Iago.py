@@ -63,7 +63,7 @@ def format_data():
             print(count)
 
         count = count+1
-        moves = game.split()
+        moves = game.split() # Separate by spaces
 
         black_win = moves[0] # Save how black did in the game    
 
@@ -94,29 +94,6 @@ def format_data():
 
             # Check if move is legal. If it's not, that means the player skipped their turn.
             legal_moves = GetPossibleMoves(board, player)
-
-            #build data and targets
-            if player == "B":
-                tempX = np.zeros((1,5,8,8), int) #same format as final data
-
-                tempX[0][0][:][:] = (np.asarray(board) == "B").astype(int)
-                tempX[0][1][:][:] = (np.asarray(board) == "W").astype(int)
-                tempX[0][2][:][:] = np.logical_not(np.logical_xor(tempX[0][0][:][:],tempX[0][1][:][:]))
-                for a in legal_moves:
-                    tempX[0][3][a[0]][a[1]]
-                tempX[0][4][:][:] = black_win
-
-                X.append(tempX)
-
-            elif player == "W":
-                tempy = np.zeros((1,3,8,8), int)
-                tempy[0][0][:][:] = (np.asarray(board) == "B").astype(int)
-                tempy[0][1][:][:] = (np.asarray(board) == "W").astype(int)
-                tempy[0][2][:][:] = np.logical_not(np.logical_xor(tempy[0][0][:][:],tempy[0][1][:][:]))
-
-                y.append(tempy)
-
-
             if (x_move, y_move) not in legal_moves:
                 black_turn = not black_turn
                 if black_turn:
@@ -140,18 +117,35 @@ def format_data():
                     X.append(tempX)
                 else:
                     player = "W"
+            else:
+                #Else, it's a legal move
+                #build data and targets
+                if player == "B":
+                    tempX = np.zeros((1,5,8,8), int) #same format as final data
+
+                    tempX[0][0][:][:] = (np.asarray(board) == "B").astype(int)
+                    tempX[0][1][:][:] = (np.asarray(board) == "W").astype(int)
+                    tempX[0][2][:][:] = np.logical_not(np.logical_xor(tempX[0][0][:][:],tempX[0][1][:][:]))
+                    for a in legal_moves:
+                        tempX[0][3][a[0]][a[1]]
+                    tempX[0][4][:][:] = black_win
+
+                    X.append(tempX)
+
+                elif player == "W":
+                    tempy = np.zeros((1,3,8,8), int)
+                    tempy[0][0][:][:] = (np.asarray(board) == "B").astype(int)
+                    tempy[0][1][:][:] = (np.asarray(board) == "W").astype(int)
+                    tempy[0][2][:][:] = np.logical_not(np.logical_xor(tempy[0][0][:][:],tempy[0][1][:][:]))
+
+                    y.append(tempy)
+
 
             # Continue through the game
             flip = GetPiecesToFlip(board, x_move, y_move, player)
             board[y_move][x_move] = player
             board = FlipPieces(board, flip, player)
-            # Put the states for black moves in X
-            # Put the states for white moves in Y
-            # TODO
             black_turn = not black_turn
-
-        # Put the states for that slice in X
-        # Put the states for the next move in Y
 
     X = np.asarray(X)
     y = np.asarray(y)
