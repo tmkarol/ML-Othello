@@ -38,7 +38,7 @@ def load_wtb_file(filename):
             output.write(str(-1))
         output.write(' ')
         for i in range(8,68):
-            move = str(record[i])
+            move = str(record[i]-11).zfill(2)
             output.write(move) #move lists
             output.write(' ')
         output.write('\n')

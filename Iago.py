@@ -20,7 +20,6 @@ def build_model():
     Dense((8,8), activation ='softmax')] #TODO sortof make this into an autoencoder to get proper output
 
     cnn_model = Sequential(cnn_layers)
-    #raise NotImplementedError()
 
     cnn_model.compile(optimizer="adam", loss='sparse_categorical_crossentropy', metrics=['accuracy'])
     cnn_model.fit(x_train.reshape(-1, 28, 28 ,1), y_train, epochs=1)
@@ -28,5 +27,9 @@ def build_model():
 
 def format_data():
     dataset = open("WTH_2004.txt", "rb").read()
+    
+    
+
+print("Hello World")
     
 
