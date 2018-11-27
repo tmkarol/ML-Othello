@@ -17,7 +17,7 @@ def build_model():
     Conv2D(128,kernel_size=(3, 3), padding = 'same', activation='relu'),
     Conv2D(32,kernel_size=(3, 3), padding = 'same', activation='relu'),
     Conv2D(32,kernel_size=(1, 1), padding = 'same', activation='relu'),
-    Dense(10, activation ='softmax')] #TODO sortof make this into an autoencoder to get proper output
+    Dense((8,8), activation ='softmax')] #TODO sortof make this into an autoencoder to get proper output
 
     cnn_model = Sequential(cnn_layers)
     #raise NotImplementedError()
@@ -27,5 +27,6 @@ def build_model():
 
 
 def format_data():
-    #stuff
+    dataset = open("WTH_2004.txt", "rb").read()
+    
 

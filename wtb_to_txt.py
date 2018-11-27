@@ -10,7 +10,7 @@ def load_wtb_file(filename):
 
     header = dataset[:16]
     numberOfRecords = bytes_to_int(header[4:7])
-    body = dataset[16:]
+    body = dataset[17:]
 
     print(numberOfRecords)
 
@@ -37,8 +37,8 @@ def load_wtb_file(filename):
         else:
             output.write(str(-1))
         output.write(' ')
-        for i in range(0,60,2):
-            move = str(bytes_to_int(record[8+i:9+i])-11).zfill(2)
+        for i in range(9,60):
+            move = str(record[i])
             output.write(move) #move lists
             output.write(' ')
         output.write('\n')
