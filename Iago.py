@@ -5,6 +5,7 @@ import tensorflow as tf
 import tensorflow.keras as keras
 from tensorflow.keras.layers import Dense
 from tensorflow.keras import Model, Input
+from main.py import GetPossibleMoves
 
 
 def build_model():
@@ -25,7 +26,14 @@ def build_model():
     cnn_model.compile(optimizer="adam", loss='sparse_categorical_crossentropy', metrics=['accuracy'])
     cnn_model.fit(x_train.reshape(-1, 28, 28 ,1), y_train, epochs=1)
 
-
+'''
+Will yield in this order: 
+1 black else 0
+1 white else 0
+1 free else 0
+1 legal else 0
+All 1 black win, all 0 tie, all -1 black lose
+'''
 def format_data():
     dataset = open("WTH_2004.txt", "rb").read()
     
