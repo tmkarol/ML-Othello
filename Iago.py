@@ -124,6 +124,9 @@ def format_data():
             flip = GetPiecesToFlip(board, x_move, y_move, player)
             board[y_move][x_move] = player
             board = FlipPieces(board, flip, player)
+            # Put the states for black moves in X
+            # Put the states for white moves in Y
+            # TODO
             black_turn = not black_turn
 
         # Put the states for that slice in X
