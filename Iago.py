@@ -51,8 +51,8 @@ def format_data():
     output_y = open("WTH_dataset_y.txt","w")
     # initialize X and y arrays
     # 13312 = number of games we have
-    X = np.zeros((1, 5, 8, 8), int)
-    y = np.zeros((1, 3, 8, 8), int)
+    X = []
+    y = []
 
     # For each game
     games = dataset.readlines()
@@ -61,6 +61,7 @@ def format_data():
         
         if(count%100 == 0):
             print(count)
+
         count = count+1
         moves = game.split()
 
@@ -93,16 +94,10 @@ def format_data():
 
             # Check if move is legal. If it's not, that means the player skipped their turn.
             legal_moves = GetPossibleMoves(board, player)
-            if (x_move, y_move) not in legal_moves:
-                black_turn = not black_turn
-                if black_turn:
-                    player = "B"
-                else:
-                    player = "W"
 
             #build data and targets
             if player == "B":
-                tempX = np.zeros((1, 5, 8, 8), int) #same format as final data
+                tempX = np.zeros((1,5,8,8), int) #same format as final data
 
                 tempX[0][0][:][:] = (np.asarray(board) == "B").astype(int)
                 tempX[0][1][:][:] = (np.asarray(board) == "W").astype(int)
@@ -111,20 +106,40 @@ def format_data():
                     tempX[0][3][a[0]][a[1]]
                 tempX[0][4][:][:] = black_win
 
-                output_X.write(tempX)
-                output_X.write("\n")
-                X = np.append(X,tempX,axis=0)
+                X.append(tempX)
 
             elif player == "W":
                 tempy = np.zeros((1,3,8,8), int)
-                tempX[0][0][:][:] = (np.asarray(board) == "B").astype(int)
-                tempX[0][1][:][:] = (np.asarray(board) == "W").astype(int)
+                tempy[0][0][:][:] = (np.asarray(board) == "B").astype(int)
+                tempy[0][1][:][:] = (np.asarray(board) == "W").astype(int)
                 tempy[0][2][:][:] = np.logical_not(np.logical_xor(tempy[0][0][:][:],tempy[0][1][:][:]))
 
-                output_y.write(tempy)
-                output_y.write("\n")
-                y = np.append(y,tempy,axis=0)
+                y.append(tempy)
 
+
+            if (x_move, y_move) not in legal_moves:
+                black_turn = not black_turn
+                if black_turn:
+                    player = "B"
+                    tempX = np.zeros((1,5,8,8), int) #same format as final data
+
+                    tempX[0][0][:][:] = (np.asarray(board) == "B").astype(int)
+                    tempX[0][1][:][:] = (np.asarray(board) == "W").astype(int)
+                    tempX[0][2][:][:] = np.logical_not(np.logical_xor(tempX[0][0][:][:],tempX[0][1][:][:]))
+                    for a in legal_moves:
+                        tempX[0][3][a[0]][a[1]]
+                    tempX[0][4][:][:] = black_win
+
+                    tempy = np.zeros((1,3,8,8), int)
+                    tempy[0][0][:][:] = (np.asarray(board) == "B").astype(int)
+                    tempy[0][1][:][:] = (np.asarray(board) == "W").astype(int)
+                    tempy[0][2][:][:] = np.logical_not(np.logical_xor(tempy[0][0][:][:],tempy[0][1][:][:]))
+
+                    y.append(tempy)
+
+                    X.append(tempX)
+                else:
+                    player = "W"
 
             # Continue through the game
             flip = GetPiecesToFlip(board, x_move, y_move, player)
@@ -138,23 +153,40 @@ def format_data():
         # Put the states for that slice in X
         # Put the states for the next move in Y
 
+    X = np.asarray(X)
+    y = np.asarray(y)
+    
+    print(X.shape)
+    print(y.shape)
+    #save everything
+    #open with np.loadtxt('WTH_dataset_X.txt').reshape((32, 5, 8, 8))
+    # I'm writing a header here just for the sake of readability
+    # Any line starting with "#" will be ignored by numpy.loadtxt
+    output_X.write('# Data shape: {0}\n'.format(X.shape))
+    # Iterating through a ndimensional array produces slices along
+    # the last axis. This is equivalent to data[i,:,:] in this case
+    for sample in X:
+        # The formatting string indicates that I'm writing out
+        # the values in left-justified columns 7 characters in width
+        # with 2 decimal places.
+        for sample_slice in sample:
+            np.savetxt(output_X, sample_slice, fmt='%d')
+
+        # Writing out a break to indicate different slices...
+            output_X.write('# New slice\n')
+        output_X.write('# New sample\n')
+
     # Split X and y into train and test
-    X_train = X[1:int(.8*X.shape[0])]
+    X_train = X[:int(.8*X.shape[0])]
     X_test = X[int(.8*X.shape[0])+1:]
-    y_train = y[1:int(.8*y.shape[0])]
+    y_train = y[:int(.8*y.shape[0])]
     y_test = y[int(.8*y.shape[0])+1:]
 
-    print(X[1])
-    print(y[1])
     return X_train, X_test, y_train, y_test
     #return 0,0,0,0
 
-    
-print("Hello World")
-X_train, X_test, y_train, y_test = format_data()
 
-X_train = np.zeros((13312,5,8,8))
-y_train = np.ones((13312,3,8,8))
+X_train, X_test, y_train, y_test = format_data()
 
 #build_model(X_train, y_train)
     
