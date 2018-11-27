@@ -47,6 +47,8 @@ Will yield state arrays in this order:
 '''
 def format_data():
     dataset = open("WTH_2004.txt", "rb")
+    output_X = open("WTH_dataset_X.txt","w")
+    output_y = open("WTH_dataset_y.txt","w")
     # initialize X and y arrays
     # 13312 = number of games we have
     X = np.zeros((1, 5, 8, 8), int)
@@ -109,6 +111,8 @@ def format_data():
                     tempX[0][3][a[0]][a[1]]
                 tempX[0][4][:][:] = black_win
 
+                output_X.write(tempX)
+                output_X.write("\n")
                 X = np.append(X,tempX,axis=0)
 
             elif player == "W":
@@ -117,6 +121,8 @@ def format_data():
                 tempX[0][1][:][:] = (np.asarray(board) == "W").astype(int)
                 tempy[0][2][:][:] = np.logical_not(np.logical_xor(tempy[0][0][:][:],tempy[0][1][:][:]))
 
+                output_y.write(tempy)
+                output_y.write("\n")
                 y = np.append(y,tempy,axis=0)
 
 
