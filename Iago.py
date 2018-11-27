@@ -94,52 +94,33 @@ def format_data():
 
             # Check if move is legal. If it's not, that means the player skipped their turn.
             legal_moves = GetPossibleMoves(board, player)
-
-            #build data and targets
-            if player == "B":
-                tempX = np.zeros((1,5,8,8), int) #same format as final data
-
-                tempX[0][0][:][:] = (np.asarray(board) == "B").astype(int)
-                tempX[0][1][:][:] = (np.asarray(board) == "W").astype(int)
-                tempX[0][2][:][:] = np.logical_not(np.logical_xor(tempX[0][0][:][:],tempX[0][1][:][:]))
-                for a in legal_moves:
-                    tempX[0][3][a[0]][a[1]]
-                tempX[0][4][:][:] = black_win
-
-                X.append(tempX)
-
-            elif player == "W":
-                tempy = np.zeros((1,3,8,8), int)
-                tempy[0][0][:][:] = (np.asarray(board) == "B").astype(int)
-                tempy[0][1][:][:] = (np.asarray(board) == "W").astype(int)
-                tempy[0][2][:][:] = np.logical_not(np.logical_xor(tempy[0][0][:][:],tempy[0][1][:][:]))
-
-                y.append(tempy)
-
-
             if (x_move, y_move) not in legal_moves:
                 black_turn = not black_turn
                 if black_turn:
                     player = "B"
-                    tempX = np.zeros((1,5,8,8), int) #same format as final data
-
-                    tempX[0][0][:][:] = (np.asarray(board) == "B").astype(int)
-                    tempX[0][1][:][:] = (np.asarray(board) == "W").astype(int)
-                    tempX[0][2][:][:] = np.logical_not(np.logical_xor(tempX[0][0][:][:],tempX[0][1][:][:]))
-                    for a in legal_moves:
-                        tempX[0][3][a[0]][a[1]]
-                    tempX[0][4][:][:] = black_win
-
-                    tempy = np.zeros((1,3,8,8), int)
-                    tempy[0][0][:][:] = (np.asarray(board) == "B").astype(int)
-                    tempy[0][1][:][:] = (np.asarray(board) == "W").astype(int)
-                    tempy[0][2][:][:] = np.logical_not(np.logical_xor(tempy[0][0][:][:],tempy[0][1][:][:]))
-
-                    y.append(tempy)
-
-                    X.append(tempX)
                 else:
                     player = "W"
+            
+            #build data and targets
+            if player == "B":
+                tempX = np.zeros((5,8,8), int) #same format as final data
+
+                tempX[0][:][:] = (np.asarray(board) == "B").astype(int)
+                tempX[1][:][:] = (np.asarray(board) == "W").astype(int)
+                tempX[2][:][:] = np.logical_not(np.logical_xor(tempX[0][:][:],tempX[1][:][:]))
+                for a in legal_moves:
+                    tempX[3][a[0]][a[1]]
+                tempX[4][:][:] = black_win
+
+                X.append(tempX)
+
+            elif player == "W":
+                tempy = np.zeros((3,8,8), int)
+                tempy[0][:][:] = (np.asarray(board) == "B").astype(int)
+                tempy[1][:][:] = (np.asarray(board) == "W").astype(int)
+                tempy[2][:][:] = np.logical_not(np.logical_xor(tempy[0][:][:],tempy[1][:][:]))
+
+                y.append(tempy)
 
             # Continue through the game
             flip = GetPiecesToFlip(board, x_move, y_move, player)
@@ -175,6 +156,20 @@ def format_data():
         # Writing out a break to indicate different slices...
             output_X.write('# New slice\n')
         output_X.write('# New sample\n')
+
+    output_y.write('# Data shape: {0}\n'.format(y.shape))
+    # Iterating through a ndimensional array produces slices along
+    # the last axis. This is equivalent to data[i,:,:] in this case
+    for sample in y:
+        # The formatting string indicates that I'm writing out
+        # the values in left-justified columns 7 characters in width
+        # with 2 decimal places.
+        for sample_slice in sample:
+            np.savetxt(output_y, sample_slice, fmt='%d')
+
+        # Writing out a break to indicate different slices...
+            output_y.write('# New slice\n')
+        output_y.write('# New sample\n')
 
     # Split X and y into train and test
     X_train = X[:int(.8*X.shape[0])]
