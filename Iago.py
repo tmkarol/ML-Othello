@@ -32,10 +32,16 @@ def build_model(X_train, y_test):
     cnn_model = Sequential(model)
     cnn_model.summary() #to figure out what is in the model
 
-    cnn_model.compile(optimizer="adam", loss='mse')
-    cnn_model.fit(X_train.reshape(-1, 5, 8, 8), y_train, epochs=100)
+    cnn_model.compile(optimizer="adam", loss='mse', metrics=['accuracy'])
+    cnn_model.fit(X_train.reshape(-1, 5, 8, 8), y_train, epochs=10)
 
     cnn_model.save("trained_model.h5")
+
+    return cnn_model
+
+def evaluate_model(model,X,y):
+    score = model.evaluate(X,y)
+    print(f"\nThe simple model achieves an accuracy of {score[1]*100:.2f}% on the test data.")
 
 '''
 Will yield state arrays in this order: 
@@ -57,12 +63,14 @@ def format_data():
     # For each game
     games = dataset.readlines()
     count = 0
+
     for game in games:
         
-        if(count%100 == 0):
+        if len(X) > len(y):
+            X.pop()
+        if count%100 == 0:
             print(count)
-
-        count = count+1
+        count = count + 1
         moves = game.split() # Separate by spaces
 
         black_win = moves[0] # Save how black did in the game    
@@ -114,6 +122,7 @@ def format_data():
 
                     y.append(tempy)
                     X.append(tempX)
+
                 else:
                     player = "W"
             else:
@@ -139,6 +148,7 @@ def format_data():
 
                     y.append(tempy)
 
+
             # Continue through the game
             flip = GetPiecesToFlip(board, x_move, y_move, player)
             board[y_move][x_move] = player
@@ -150,6 +160,7 @@ def format_data():
     
     print(X.shape)
     print(y.shape)
+
     #save everything
     #open with np.loadtxt('WTH_dataset_X.txt').reshape((32, 5, 8, 8))
     # I'm writing a header here just for the sake of readability
@@ -192,7 +203,9 @@ def format_data():
     #return 0,0,0,0
 
 
+#TODO check if dataset files exist and load if they do. Remake if they dont
+
 X_train, X_test, y_train, y_test = format_data()
 
-#build_model(X_train, y_train)
-    
+model = build_model(X_train, y_train)
+evaluate_model(model, X_test, y_test)
