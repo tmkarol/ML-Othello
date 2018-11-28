@@ -8,23 +8,23 @@ import numpy as np
 import tensorflow as tf
 import tensorflow.keras as keras
 
-from tensorflow.keras.layers import Dense, Conv3D, Reshape, Flatten
+from tensorflow.keras.layers import Dense, Conv2D, Reshape, Flatten
 from tensorflow.keras import Sequential
 
 from main import GetPossibleMoves, GetPiecesToFlip, FlipPieces
 
 
-def build_model(X_train, y_test):
-    #multilayer model of convolutional 3D layers. Takes an (5,8,8) input. Outputs an (3,8,8)
+def build_model(X_train, y_train):
+    #multilayer model of convolutional 3D layers. Takes an (4,8,8) input. Outputs an (3,8,8)
 
-    model = [ Conv3D(32,kernel_size=(3, 3, 5), padding = 'same', activation='relu', input_shape = (5,8,8)),
-    Conv3D(32,kernel_size=(3, 3, 5), padding = 'same', activation='relu'),
-    Conv3D(64,kernel_size=(3, 3, 5), padding = 'same', activation='relu'),
-    Conv3D(64,kernel_size=(3, 3, 5), padding = 'same', activation='relu'),
-    Conv3D(128,kernel_size=(3, 3, 5), padding = 'same', activation='relu'),
-    Conv3D(128,kernel_size=(3, 3, 5), padding = 'same', activation='relu'),
-    Conv3D(32,kernel_size=(3, 3, 5), padding = 'same', activation='relu'),
-    Conv3D(32,kernel_size=(1, 1, 5), padding = 'same', activation='relu'),
+    model = [ Conv2D(32,kernel_size=(3, 3), padding = 'same', activation='relu', input_shape = (4,8,8)),
+    Conv2D(32,kernel_size=(3, 3), padding = 'same', activation='relu'),
+    Conv2D(64,kernel_size=(3, 3), padding = 'same', activation='relu'),
+    Conv2D(64,kernel_size=(3, 3), padding = 'same', activation='relu'),
+    Conv2D(128,kernel_size=(3, 3), padding = 'same', activation='relu'),
+    Conv2D(128,kernel_size=(3, 3), padding = 'same', activation='relu'),
+    Conv2D(256,kernel_size=(3, 3), padding = 'same', activation='relu'),
+    Conv2D(256,kernel_size=(1, 1), padding = 'same', activation='relu'),
     Flatten(),
     Dense(192, activation ='softmax'),
     Reshape(target_shape=(3,8,8))]
@@ -33,12 +33,14 @@ def build_model(X_train, y_test):
     cnn_model.summary() #to figure out what is in the model
 
     cnn_model.compile(optimizer="adam", loss='mse', metrics=['accuracy'])
-    cnn_model.fit(X_train.reshape(-1, 5, 8, 8), y_train, epochs=10)
+    cnn_model.fit(X_train.reshape(-1, 4, 8, 8), y_train, epochs=5)
 
     cnn_model.save("trained_model.h5")
 
     return cnn_model
 
+
+#TODO make model predict the next move using argmax over only legal move squares
 def evaluate_model(model,X,y):
     score = model.evaluate(X,y)
     print(f"\nThe simple model achieves an accuracy of {score[1]*100:.2f}% on the test data.")
@@ -73,7 +75,8 @@ def format_data():
         count = count + 1
         moves = game.split() # Separate by spaces
 
-        black_win = moves[0] # Save how black did in the game    
+        if moves[0] == -1:
+            continue #throw out losses    
 
         #build boardstate for game
         board = []
@@ -106,14 +109,13 @@ def format_data():
                 black_turn = not black_turn
                 if black_turn:
                     player = "B"
-                    tempX = np.zeros((5,8,8), int) #same format as final data
+                    tempX = np.zeros((4,8,8), int) #same format as final data
 
                     tempX[0][:][:] = (np.asarray(board) == "B").astype(int)
                     tempX[1][:][:] = (np.asarray(board) == "W").astype(int)
                     tempX[2][:][:] = np.logical_not(np.logical_xor(tempX[0][:][:],tempX[1][:][:]))
                     for a in legal_moves:
                         tempX[3][a[0]][a[1]]
-                    tempX[4][:][:] = black_win
 
                     tempy = np.zeros((3,8,8), int)
                     tempy[0][:][:] = (np.asarray(board) == "B").astype(int)
@@ -129,14 +131,13 @@ def format_data():
                 #Else, it's a legal move
                 #build data and targets
                 if player == "B":
-                    tempX = np.zeros((5,8,8), int) #same format as final data
+                    tempX = np.zeros((4,8,8), int) #same format as final data
 
                     tempX[0][:][:] = (np.asarray(board) == "B").astype(int)
                     tempX[1][:][:] = (np.asarray(board) == "W").astype(int)
                     tempX[2][:][:] = np.logical_not(np.logical_xor(tempX[0][:][:],tempX[1][:][:]))
                     for a in legal_moves:
                         tempX[3][a[0]][a[1]]
-                    tempX[4][:][:] = black_win
 
                     X.append(tempX)
 
@@ -162,7 +163,7 @@ def format_data():
     print(y.shape)
 
     #save everything
-    #open with np.loadtxt('WTH_dataset_X.txt').reshape((32, 5, 8, 8))
+    #open with np.loadtxt('WTH_dataset_X.txt').reshape((271971, 5, 8, 8))
     # I'm writing a header here just for the sake of readability
     # Any line starting with "#" will be ignored by numpy.loadtxt
     output_X.write('# Data shape: {0}\n'.format(X.shape))
@@ -206,6 +207,9 @@ def format_data():
 #TODO check if dataset files exist and load if they do. Remake if they dont
 
 X_train, X_test, y_train, y_test = format_data()
+
+print(X_train.shape)
+print(y_train.shape)
 
 model = build_model(X_train, y_train)
 evaluate_model(model, X_test, y_test)
