@@ -1,4 +1,6 @@
 import math
+import tensorflow as tf
+import tensorflow.keras as keras
 
 def PrintBoard(board):
     '''
@@ -222,11 +224,13 @@ def RunOneAI():
         if len(GetPossibleMoves(board, player)) == 0 and len(GetPossibleMoves(board, other_player)) == 0:
             break
 
-        if player == 'B':
+        if player == 'W':
             tmp = PromptMove(board, player)
         else:
             # TODO: Make AI decsision
+            move = evaluate_AI_move(board)
             # TODO: Call MakeAIMove
+            temp = MakeAIMove(board,move,player)
             raise NotImplementedError
         if not tmp == False:
             board = tmp
