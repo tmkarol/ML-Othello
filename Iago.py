@@ -18,9 +18,9 @@ from main import GetPossibleMoves, GetPiecesToFlip, FlipPieces
 
 
 def create_model(optimizer="adam",activation = "relu", neurons_a = 32, neurons_b = 64, neurons_c = 128, padding = "same", loss = "categorical_crossentropy", kernel_sz = (3,3)):
-    #multilayer model of convolutional 3D layers. Takes an (4,8,8) input. Outputs an (1,8,8)
+    #multilayer model of convolutional 3D layers. Takes an (8,8,4) input. Outputs an (8,8,1)
 
-    model = [ Conv2D(neurons_a,kernel_size=kernel_sz, padding = padding, activation=activation, input_shape = (4,8,8)),
+    model = [ Conv2D(neurons_a,kernel_size=kernel_sz, padding = padding, activation=activation, input_shape = (8,8,4)),
     Conv2D(neurons_a,kernel_size=kernel_sz, padding = padding, activation=activation),
     Conv2D(neurons_b,kernel_size=kernel_sz, padding = padding, activation=activation),
     Conv2D(neurons_b,kernel_size=kernel_sz, padding = padding, activation=activation),
@@ -29,8 +29,8 @@ def create_model(optimizer="adam",activation = "relu", neurons_a = 32, neurons_b
     Conv2D(neurons_b,kernel_size=kernel_sz, padding = padding, activation=activation),
     Conv2D(neurons_a,kernel_size=(1, 1), padding = padding, activation=activation),
     Flatten(),
-    Dense(64, activation ='softmax'),
-    Reshape(target_shape=(1,8,8))]
+    Dense(64, activation ='softmax')]
+    #Reshape(target_shape=(1,8,8))]
 
     cnn_model = Sequential(model)
     cnn_model.summary() #to figure out what is in the model
@@ -111,16 +111,16 @@ def format_data():
                 black_turn = not black_turn
                 if black_turn:
                     player = "B"
-                    tempX = np.zeros((4,8,8), int) #same format as final data
+                    tempX = np.zeros((8,8,4), int) #same format as final data
 
-                    tempX[0][:][:] = (np.asarray(board) == "B").astype(int)
-                    tempX[1][:][:] = (np.asarray(board) == "W").astype(int)
-                    tempX[2][:][:] = np.logical_not(np.logical_xor(tempX[0][:][:],tempX[1][:][:]))
+                    tempX[:,:,0] = (np.asarray(board) == "B").astype(int)
+                    tempX[:,:,1] = (np.asarray(board) == "W").astype(int)
+                    tempX[:,:,2] = np.logical_not(np.logical_xor(tempX[:,:,0],tempX[:,:,1]))
                     for a in legal_moves:
-                        tempX[3][a[1]][a[0]] = 1
+                        tempX[a[1],a[0],3] = 1
 
-                    tempy = np.zeros((1,8,8), int)
-                    tempy[0][:][:] = np.logical_and((np.asarray(board) == "B").astype(int), X[len(X)-2][3][:][:])
+                    tempy = np.zeros((8,8,1), int)
+                    tempy[:,:,0] = np.logical_and((np.asarray(board) == "B").astype(int), X[len(X)-2][:,:,3])
 
                     y.append(tempy)
                     X.append(tempX)
@@ -131,19 +131,19 @@ def format_data():
                 #Else, it's a legal move
                 #build data and targets
                 if player == "B":
-                    tempX = np.zeros((4,8,8), int) #same format as final data
+                    tempX = np.zeros((8,8,4), int) #same format as final data
 
-                    tempX[0][:][:] = (np.asarray(board) == "B").astype(int)
-                    tempX[1][:][:] = (np.asarray(board) == "W").astype(int)
-                    tempX[2][:][:] = np.logical_not(np.logical_xor(tempX[0][:][:],tempX[1][:][:]))
+                    tempX[:,:,0] = (np.asarray(board) == "B").astype(int)
+                    tempX[:,:,1] = (np.asarray(board) == "W").astype(int)
+                    tempX[:,:,2] = np.logical_not(np.logical_xor(tempX[:,:,0],tempX[:,:,1]))
                     for a in legal_moves:
-                        tempX[3][a[1]][a[0]] = 1
+                        tempX[a[1],a[0],3] = 1
 
                     X.append(tempX)
 
                 elif player == "W":
-                    tempy = np.zeros((1,8,8), int)
-                    tempy[0][:][:] = np.logical_and((np.asarray(board) == "B").astype(int), X[len(X)-1][3][:][:])
+                    tempy = np.zeros((8,8,1), int)
+                    tempy[:,:,0] = np.logical_and((np.asarray(board) == "B").astype(int), X[len(X)-2][:,:,3])
 
                     y.append(tempy)
 
@@ -161,12 +161,10 @@ def format_data():
     print(y.shape)
 
     #save everything
-    #open with np.loadtxt('WTH_dataset_X.txt').reshape((271971, 5, 8, 8))
+    #open with np.loadtxt('WTH_dataset_X.txt').reshape((271971, 8, 8, 4))
     # I'm writing a header here just for the sake of readability
     # Any line starting with "#" will be ignored by numpy.loadtxt
     output_X.write('# Data shape: {0}\n'.format(X.shape))
-    # Iterating through a ndimensional array produces slices along
-    # the last axis. This is equivalent to data[i,:,:] in this case
     for sample in X:
         # The formatting string indicates that I'm writing out
         # the values in left-justified columns 7 characters in width
@@ -199,15 +197,15 @@ if (not os.path.isfile('WTH_dataset_X.txt')) or (not os.path.isfile('WTH_dataset
     X_train, X_test, y_train, y_test = format_data()
 else:
     print("Load data from file")
-    X = np.loadtxt('WTH_dataset_X.txt').reshape((271971, 4, 8, 8))
-    y = np.loadtxt('WTH_dataset_y.txt').reshape((271971, 1, 8, 8))
+    X = np.loadtxt('WTH_dataset_X.txt').reshape((271971, 8, 8, 4))
+    y = np.loadtxt('WTH_dataset_y.txt').reshape((271971, 8, 8, 1))
     X_train = X[:int(.8*X.shape[0])]        #TODO changed for testing
     X_test = X[int(.8*X.shape[0])+1:]
     y_train = y[:int(.8*y.shape[0])]        #TODO changed for testing
     y_test = y[int(.8*y.shape[0])+1:]
 
-    X_train = X[:5000]
-    y_train = y[:5000]
+X_train = X[:5000]
+y_train = y[:5000].reshape(5000,64)
 
 print(X_train.shape)
 print(y_train.shape)
@@ -215,18 +213,18 @@ print(y_train.shape)
 model = KerasClassifier(build_fn=create_model, verbose=0)
 
 # define the grid search parameters
-batch_size = [10, 20, 40]
-epochs = [1, 2, 5]
+batch_size = [10]
+epochs = [2]
 optimizer = ['SGD', 'Adadelta', 'Adam']
-activation = ['softplus', 'softsign', 'relu', 'tanh', 'sigmoid', 'hard_sigmoid', 'linear']
-neurons_a = [16, 32, 64]
-neurons_b = [32, 64, 128]
-neurons_c = [64, 128, 256]
-padding = ["same", "valid","casual"]
+activation = ['relu', 'tanh', 'sigmoid']
+neurons_a = [16, 32]
+neurons_b = [64, 128]
+neurons_c = [128, 256]
+padding = ["same", "valid"]
 loss = ["categorical_crossentropy", 'mean_squared_error', "categorical_hinge"]
-kernel_sz = [(3,3), (2,2), (5,5)]
+#kernel_sz = [(2,2), (3,3), (5,5)]
 
-param_grid = dict(batch_size=batch_size, epochs=epochs, optimizer=optimizer, activation=activation,neurons_a=neurons_a,neurons_b=neurons_b,neurons_c=neurons_c,padding=padding,loss=loss,kernel_sz=kernel_sz)
+param_grid = dict(batch_size=batch_size, epochs=epochs, optimizer=optimizer, activation=activation,neurons_a=neurons_a,neurons_b=neurons_b,neurons_c=neurons_c,padding=padding,loss=loss)
 grid = GridSearchCV(estimator=model, param_grid=param_grid)
 
 print("Begin Fit")
