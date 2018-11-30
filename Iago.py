@@ -8,6 +8,8 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import numpy as np
 import tensorflow as tf
 import tensorflow.keras as keras
+from keras.wrappers.scikit_learn import KerasClassifier
+from sklearn.model_selection import GridSearchCV
 
 from tensorflow.keras.layers import Dense, Conv2D, Reshape, Flatten
 from tensorflow.keras import Sequential
@@ -15,17 +17,17 @@ from tensorflow.keras import Sequential
 from main import GetPossibleMoves, GetPiecesToFlip, FlipPieces
 
 
-def build_model(X_train, y_train):
+def create_model(optimizer="adam",activation = "relu", neurons_a = 32, neurons_b = 64, neurons_c = 128, padding = "same", loss = "categorical_crossentropy", kernel_sz = (3,3)):
     #multilayer model of convolutional 3D layers. Takes an (4,8,8) input. Outputs an (1,8,8)
 
-    model = [ Conv2D(32,kernel_size=(3, 3), padding = 'same', activation='relu', input_shape = (4,8,8)),
-    Conv2D(64,kernel_size=(3, 3), padding = 'same', activation='relu'),
-    Conv2D(128,kernel_size=(3, 3), padding = 'same', activation='relu'),
-    Conv2D(256,kernel_size=(3, 3), padding = 'same', activation='relu'),
-    Conv2D(256,kernel_size=(3, 3), padding = 'same', activation='relu'),
-    Conv2D(128,kernel_size=(3, 3), padding = 'same', activation='relu'),
-    Conv2D(64,kernel_size=(3, 3), padding = 'same', activation='relu'),
-    Conv2D(64,kernel_size=(1, 1), padding = 'same', activation='relu'),
+    model = [ Conv2D(neurons_a,kernel_size=kernel_sz, padding = padding, activation=activation, input_shape = (4,8,8)),
+    Conv2D(neurons_a,kernel_size=kernel_sz, padding = padding, activation=activation),
+    Conv2D(neurons_b,kernel_size=kernel_sz, padding = padding, activation=activation),
+    Conv2D(neurons_b,kernel_size=kernel_sz, padding = padding, activation=activation),
+    Conv2D(neurons_c,kernel_size=kernel_sz, padding = padding, activation=activation),
+    Conv2D(neurons_c,kernel_size=kernel_sz, padding = padding, activation=activation),
+    Conv2D(neurons_b,kernel_size=kernel_sz, padding = padding, activation=activation),
+    Conv2D(neurons_a,kernel_size=(1, 1), padding = padding, activation=activation),
     Flatten(),
     Dense(64, activation ='softmax'),
     Reshape(target_shape=(1,8,8))]
@@ -33,15 +35,11 @@ def build_model(X_train, y_train):
     cnn_model = Sequential(model)
     cnn_model.summary() #to figure out what is in the model
 
-    cnn_model.compile(optimizer="adam", loss='categorical_crossentropy', metrics=['accuracy'])
-    cnn_model.fit(X_train.reshape(-1, 4, 8, 8), y_train, epochs=5)
-
-    cnn_model.save("trained_model.h5")
+    cnn_model.compile(optimizer=optimizer, loss=loss, metrics=['accuracy'])
 
     return cnn_model
 
 
-#TODO make model predict the next move using argmax over only legal move squares
 def evaluate_model(model,X_test,y_test):
     score = model.evaluate(X_test,y_test)
     pred = model.predict(X_test[0])
@@ -119,10 +117,10 @@ def format_data():
                     tempX[1][:][:] = (np.asarray(board) == "W").astype(int)
                     tempX[2][:][:] = np.logical_not(np.logical_xor(tempX[0][:][:],tempX[1][:][:]))
                     for a in legal_moves:
-                        tempX[3][a[0]][a[1]] = 1
+                        tempX[3][a[1]][a[0]] = 1
 
                     tempy = np.zeros((1,8,8), int)
-                    tempy[0][:][:] = np.logical_and((np.asarray(board) == "B").astype(int), X[len(X)-1][3][:][:])
+                    tempy[0][:][:] = np.logical_and((np.asarray(board) == "B").astype(int), X[len(X)-2][3][:][:])
 
                     y.append(tempy)
                     X.append(tempX)
@@ -139,7 +137,7 @@ def format_data():
                     tempX[1][:][:] = (np.asarray(board) == "W").astype(int)
                     tempX[2][:][:] = np.logical_not(np.logical_xor(tempX[0][:][:],tempX[1][:][:]))
                     for a in legal_moves:
-                        tempX[3][a[0]][a[1]] = 1
+                        tempX[3][a[1]][a[0]] = 1
 
                     X.append(tempX)
 
@@ -203,13 +201,43 @@ else:
     print("Load data from file")
     X = np.loadtxt('WTH_dataset_X.txt').reshape((271971, 4, 8, 8))
     y = np.loadtxt('WTH_dataset_y.txt').reshape((271971, 1, 8, 8))
-    X_train = X[:int(.8*X.shape[0])]
+    X_train = X[:int(.8*X.shape[0])]        #TODO changed for testing
     X_test = X[int(.8*X.shape[0])+1:]
-    y_train = y[:int(.8*y.shape[0])]
+    y_train = y[:int(.8*y.shape[0])]        #TODO changed for testing
     y_test = y[int(.8*y.shape[0])+1:]
+
+    X_train = X[:5000]
+    y_train = y[:5000]
 
 print(X_train.shape)
 print(y_train.shape)
 
-model = build_model(X_train, y_train)
-evaluate_model(model, X_test, y_test)
+model = KerasClassifier(build_fn=create_model, verbose=0)
+
+# define the grid search parameters
+batch_size = [10, 20, 40]
+epochs = [1, 2, 5]
+optimizer = ['SGD', 'Adadelta', 'Adam']
+activation = ['softplus', 'softsign', 'relu', 'tanh', 'sigmoid', 'hard_sigmoid', 'linear']
+neurons_a = [16, 32, 64]
+neurons_b = [32, 64, 128]
+neurons_c = [64, 128, 256]
+padding = ["same", "valid","casual"]
+loss = ["categorical_crossentropy", 'mean_squared_error', "categorical_hinge"]
+kernel_sz = [(3,3), (2,2), (5,5)]
+
+param_grid = dict(batch_size=batch_size, epochs=epochs, optimizer=optimizer, activation=activation,neurons_a=neurons_a,neurons_b=neurons_b,neurons_c=neurons_c,padding=padding,loss=loss,kernel_sz=kernel_sz)
+grid = GridSearchCV(estimator=model, param_grid=param_grid)
+
+print("Begin Fit")
+grid_result = grid.fit(X_train, y_train)
+
+print("Best: %f using %s" % (grid_result.best_score_, grid_result.best_params_))
+means = grid_result.cv_results_['mean_test_score']
+stds = grid_result.cv_results_['std_test_score']
+params = grid_result.cv_results_['params']
+for mean, stdev, param in zip(means, stds, params):
+    print("%f (%f) with: %r" % (mean, stdev, param))
+
+grid.best_estimator_.save("best_model.h5")
+evaluate_model(grid, X_test, y_test)

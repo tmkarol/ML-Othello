@@ -6,9 +6,11 @@ name = "pypi"
 [packages]
 tensorflow = "*"
 keras = "*"
-protobuf = "==3.6.0"
+protobuf = ">=3.6.0"
+sklearn = "*"
+pip = "==18.0"
 
 [dev-packages]
 
 [requires]
-python_version = "3.6"
+python_version = "3.6.1"
