@@ -358,4 +358,4 @@ def evaluate_AI_move(board, model, player):
     return model.predict(tempX)
 
 # Run the game!
-PromptGameType()
+# PromptGameType()
