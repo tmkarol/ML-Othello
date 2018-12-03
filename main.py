@@ -1,6 +1,7 @@
 import math
 import tensorflow as tf
 import tensorflow.keras as keras
+import numpy as np
 
 def PrintBoard(board):
     '''
@@ -216,6 +217,9 @@ def RunOneAI():
 
     player = 'B' # Human
     other_player = 'W' # AI
+    
+    # Load the model
+    AI_model = LoadModel()
 
     while not IsBoardFull(board):
         PrintBoard(board)
@@ -228,9 +232,10 @@ def RunOneAI():
             tmp = PromptMove(board, player)
         else:
             # TODO: Make AI decsision
-            move = evaluate_AI_move(board)
+            move = evaluate_AI_move(board, AI_model, player)
+            print(move)
             # TODO: Call MakeAIMove
-            temp = MakeAIMove(board,move,player)
+            temp = MakeAIMove(board, move, player)
             raise NotImplementedError
         if not tmp == False:
             board = tmp
@@ -314,20 +319,43 @@ def PromptGameType():
     print("Type the number for the type of game you'd like to run.")
     print("0: Human vs. Human")
     print("1: Human vs. AI")
-    print("2: AI vs. AI")
+    # print("2: AI vs. AI")
     choice = -1
-    while choice != 1:
+    while choice == -1:
         choice = int(input("Your choice: "))
         if choice == 0:
             RunNoAI()
         elif choice == 1:
             RunOneAI()
-        elif choice == 2:
-            RunTwoAI()
+        # elif choice == 2:
+        #    RunTwoAI()
         else:
             print("Please enter a valid choice.")
             choice = -1
     print("\n") #???
+    
+def LoadModel():
+    '''
+    Load the saved model
+    '''
+    model = keras.models.load_model("trained_model.h5")
+    model.compile(optimizer="SGD", loss="categorical_crossentropy")
+    return model
+    
+def evaluate_AI_move(board, model, player):
+    '''
+    Get a move from the AI and return it as a usable move for this format
+    '''
+    # Get the four board state arrays
+    legal_moves = GetPossibleMoves(board, player)
+    tempX = np.zeros((8,8,4), int) #same format as final data
+    tempX[:,:,0] = (np.asarray(board) == "B").astype(int)
+    tempX[:,:,1] = (np.asarray(board) == "W").astype(int)
+    tempX[:,:,2] = np.logical_not(np.logical_xor(tempX[:,:,0],tempX[:,:,1]))
+    for a in legal_moves:
+        tempX[a[1],a[0],3] = 1
+    # Make the descision about the next move
+    return model.predict(tempX)
 
 # Run the game!
-#PromptGameType()
+PromptGameType()
