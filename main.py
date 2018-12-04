@@ -133,10 +133,10 @@ def PromptMove(board, player):
 
     while (x_move, y_move) not in possibilites:
         while x_move < 0 or x_move >= len(board):
-            x_move = int(input("Enter a x coordinate(column): "))
+            x_move = int(input("Enter a x coordinate (column): "))
 
         while y_move < 0 or y_move >= len(board):
-            y_move = int(input("Enter a y coordinate(row): "))
+            y_move = int(input("Enter a y coordinate (row): "))
 
         if (x_move, y_move) not in possibilites:
             x_move = -1
@@ -231,54 +231,11 @@ def RunOneAI():
         if player == 'W':
             tmp = PromptMove(board, player)
         else:
-            # TODO: Make AI decsision
+            # Make AI decsision
             move = evaluate_AI_move(board, AI_model, player)
             print(move)
-            # TODO: Call MakeAIMove
-            temp = MakeAIMove(board, move, player)
-            raise NotImplementedError
-        if not tmp == False:
-            board = tmp
-            
-        (player, other_player) = (other_player, player)    
-
-    (black, white) = GetScore(board)
-
-    if black > white:
-        print("Black wins!")
-    elif black < white:
-        print("White wins!")
-    else:
-        print("Tie?")
-
-def RunTwoAI():
-    '''
-    Run a game with AI vs. AI
-    For training/testing purposes
-    '''
-    # create 8 by 8 board
-    board = []
-    for x in range(8):
-        board.append([' '] * 8)
-    
-    board[3][3] = 'W'
-    board[3][4] = 'B'
-    board[4][3] = 'B'
-    board[4][4] = 'W'
-
-    player = 'B' 
-    other_player = 'W' 
-
-    while not IsBoardFull(board):
-        PrintBoard(board)
-
-        # game over!
-        if len(GetPossibleMoves(board, player)) == 0 and len(GetPossibleMoves(board, other_player)) == 0:
-            break
-
-        # TODO: Make AI decsision
-        # TODO: Call MakeAIMove
-        raise NotImplementedError
+            # Call MakeAIMove
+            tmp = MakeAIMove(board, player, move)
         if not tmp == False:
             board = tmp
             
@@ -300,8 +257,8 @@ def MakeAIMove(board, player, move):
     '''
 
     # Convert given row and column to 0-7 rows and columns
-    x_move = (move % 10) - 1 # Column
-    y_move = math.floor(move / 10) - 1 # Row
+    x_move = (move % 10) # Column
+    y_move = math.floor(move / 10) # Row
 
     # Make the move
     flip = GetPiecesToFlip(board, x_move, y_move, player)
@@ -348,14 +305,14 @@ def evaluate_AI_move(board, model, player):
     '''
     # Get the four board state arrays
     legal_moves = GetPossibleMoves(board, player)
-    tempX = np.zeros((8,8,4), int) #same format as final data
-    tempX[:,:,0] = (np.asarray(board) == "B").astype(int)
-    tempX[:,:,1] = (np.asarray(board) == "W").astype(int)
-    tempX[:,:,2] = np.logical_not(np.logical_xor(tempX[:,:,0],tempX[:,:,1]))
+    tempX = np.zeros((4,8,8), int) #same format as final data
+    tempX[0,:,:] = (np.asarray(board) == "B").astype(int)
+    tempX[1,:,:] = (np.asarray(board) == "W").astype(int)
+    tempX[2,:,:] = np.logical_not(np.logical_xor(tempX[0,:,:],tempX[1,:,:]))
     for a in legal_moves:
-        tempX[a[1],a[0],3] = 1
+        tempX[3,a[1],a[0]] = 1
     # Make the descision about the next move
-    return model.predict(tempX)
+    return np.argmax(model.predict(np.expand_dims(tempX, axis=0)))
 
 # Run the game!
-# PromptGameType()
+PromptGameType()
