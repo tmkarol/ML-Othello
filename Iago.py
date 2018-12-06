@@ -9,7 +9,9 @@ import numpy as np
 import tensorflow as tf
 import tensorflow.keras as keras
 from keras.wrappers.scikit_learn import KerasClassifier
+
 from sklearn.model_selection import GridSearchCV
+from sklearn.externals import joblib
 
 from tensorflow.keras.layers import Dense, Conv2D, Reshape, Flatten
 from tensorflow.keras import Sequential
@@ -213,19 +215,19 @@ print(y_train.shape)
 model = KerasClassifier(build_fn=create_model, verbose=0)
 
 # define the grid search parameters
-batch_size = [10]
+batch_size = [1]
 epochs = [2]
-optimizer = ['SGD', 'Adadelta', 'Adam']
-activation = ['relu', 'tanh', 'sigmoid']
-neurons_a = [16, 32]
-neurons_b = [64, 128]
-neurons_c = [128, 256]
-padding = ["same", "valid"]
-loss = ["categorical_crossentropy", 'mean_squared_error', "categorical_hinge"]
-#kernel_sz = [(2,2), (3,3), (5,5)]
+optimizer = ["SGD", "Adadelta", "Adam"]
+activation = ['relu', 'sigmoid']
+neurons_a = [16,32]
+neurons_b = [64,128]
+neurons_c = [128,256]
+padding = ["same"]
+loss = ["categorical_crossentropy", 'mean_squared_error','categorical_hinge']
+#kernel_sz = [(3,3)]
 
 param_grid = dict(batch_size=batch_size, epochs=epochs, optimizer=optimizer, activation=activation,neurons_a=neurons_a,neurons_b=neurons_b,neurons_c=neurons_c,padding=padding,loss=loss)
-grid = GridSearchCV(estimator=model, param_grid=param_grid)
+grid = GridSearchCV(estimator=model, param_grid=param_grid,cv=2,verbose = 1)
 
 print("Begin Fit")
 grid_result = grid.fit(X_train, y_train)
@@ -237,5 +239,5 @@ params = grid_result.cv_results_['params']
 for mean, stdev, param in zip(means, stds, params):
     print("%f (%f) with: %r" % (mean, stdev, param))
 
-grid.best_estimator_.save("best_model.h5")
+#joblib.dump(grid.best_estimator_, 'model.pkl') 
 evaluate_model(grid, X_test, y_test)
