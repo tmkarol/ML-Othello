@@ -120,6 +120,7 @@ def PromptMove(board, player):
     Asks the (human) player to make a move.
     This function will loop until it receives a valid input.
     '''
+    print("\n")
     print(player + " player's turn!")
         
     possibilites = GetPossibleMoves(board, player)
@@ -133,7 +134,7 @@ def PromptMove(board, player):
 
     while (x_move, y_move) not in possibilites:
         while x_move < 0 or x_move >= len(board):
-            x_move = int(input("Enter a x coordinate (column): "))
+            x_move = int(input("Enter an x coordinate (column): "))
 
         while y_move < 0 or y_move >= len(board):
             y_move = int(input("Enter a y coordinate (row): "))
@@ -238,7 +239,9 @@ def RunOneAI():
         if not tmp == False:
             board = tmp
             
-        (player, other_player) = (other_player, player)    
+        (player, other_player) = (other_player, player)  
+
+    PrintBoard(board) # Print the final board state  
 
     (black, white) = GetScore(board)
 
@@ -254,6 +257,9 @@ def MakeAIMove(board, player, move):
     Function takes in the decided move from the AI and makes that move
     AI keeps the moves as column + (row * 10)
     '''
+
+    print("\n")
+    print(player + " player's turn!")
 
     # Convert given row and column to 0-7 rows and columns
     x_move = (move % 10) # Column
