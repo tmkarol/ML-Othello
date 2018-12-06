@@ -198,7 +198,7 @@ if (not os.path.isfile('WTH_dataset_X.txt')) or (not os.path.isfile('WTH_dataset
     print("Building data")
     X_train, X_test, y_train, y_test = format_data()
 else:
-    print("Load data from file")
+    print("Loading data from file")
     X = np.loadtxt('WTH_dataset_X.txt').reshape((271971, 8, 8, 4))
     y = np.loadtxt('WTH_dataset_y.txt').reshape((271971, 8, 8, 1))
     X_train = X[:int(.8*X.shape[0])]        #TODO changed for testing
@@ -206,8 +206,8 @@ else:
     y_train = y[:int(.8*y.shape[0])]        #TODO changed for testing
     y_test = y[int(.8*y.shape[0])+1:]
 
-X_train = X[:5000]
-y_train = y[:5000].reshape(5000,64)
+    X_train = X[:5000]
+    y_train = y[:5000].reshape(5000,64)
 
 print(X_train.shape)
 print(y_train.shape)
