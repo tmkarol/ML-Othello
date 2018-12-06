@@ -233,7 +233,6 @@ def RunOneAI():
         else:
             # Make AI decsision
             move = evaluate_AI_move(board, AI_model, player)
-            print(move)
             # Call MakeAIMove
             tmp = MakeAIMove(board, player, move)
         if not tmp == False:
@@ -312,7 +311,16 @@ def evaluate_AI_move(board, model, player):
     for a in legal_moves:
         tempX[3,a[1],a[0]] = 1
     # Make the descision about the next move
-    return np.argmax(model.predict(np.expand_dims(tempX, axis=0)))
+    prediction = model.predict(np.expand_dims(tempX, axis=0))
+    mask = []
+    for x in tempX[3,:,:]:
+        mask.append(x ^ 1)
+    masked_predict = np.ma.array(prediction, mask=mask)
+    flat_index = masked_predict.argmax(fill_value=0)
+    # Get the column and row from the flattened array index
+    col = flat_index % 8
+    row = flat_index // 8
+    return (row * 10) + col
 
 # Run the game!
 PromptGameType()
