@@ -19,7 +19,7 @@ from tensorflow.keras import Sequential
 from main import GetPossibleMoves, GetPiecesToFlip, FlipPieces
 
 
-def create_model(optimizer="adam",activation = "relu", neurons_a = 32, neurons_b = 64, neurons_c = 128, padding = "same", loss = "categorical_crossentropy", kernel_sz = (3,3)):
+def create_model(optimizer="Adadelta",activation = "relu", neurons_a = 32, neurons_b = 64, neurons_c = 128, padding = "same", loss = "categorical_crossentropy", kernel_sz = (3,3)):
     #multilayer model of convolutional 3D layers. Takes an (8,8,4) input. Outputs an (8,8,1)
 
     model = [ Conv2D(neurons_a,kernel_size=kernel_sz, padding = padding, activation=activation, input_shape = (8,8,4)),
@@ -198,16 +198,16 @@ if (not os.path.isfile('WTH_dataset_X.txt')) or (not os.path.isfile('WTH_dataset
     print("Building data")
     X_train, X_test, y_train, y_test = format_data()
 else:
-    print("Loading data from file")
+    print("Load data from file")
     X = np.loadtxt('WTH_dataset_X.txt').reshape((271971, 8, 8, 4))
     y = np.loadtxt('WTH_dataset_y.txt').reshape((271971, 8, 8, 1))
-    X_train = X[:int(.8*X.shape[0])]        #TODO changed for testing
+    X_train = X[:int(.8*X.shape[0])]        
     X_test = X[int(.8*X.shape[0])+1:]
-    y_train = y[:int(.8*y.shape[0])]        #TODO changed for testing
+    y_train = y[:int(.8*y.shape[0])]
     y_test = y[int(.8*y.shape[0])+1:]
 
-    X_train = X[:5000]
-    y_train = y[:5000].reshape(5000,64)
+#X_train = X[:5000]
+#y_train = y[:5000].reshape(5000,64)
 
 print(X_train.shape)
 print(y_train.shape)
@@ -215,29 +215,31 @@ print(y_train.shape)
 model = KerasClassifier(build_fn=create_model, verbose=0)
 
 # define the grid search parameters
-batch_size = [1]
-epochs = [2]
-optimizer = ["SGD", "Adadelta", "Adam"]
-activation = ['relu', 'sigmoid']
-neurons_a = [16,32]
-neurons_b = [64,128]
-neurons_c = [128,256]
-padding = ["same"]
-loss = ["categorical_crossentropy", 'mean_squared_error','categorical_hinge']
+#batch_size = [1]
+#epochs = [2]
+#optimizer = ["SGD", "Adadelta", "Adam"]
+#activation = ['relu', 'sigmoid']
+#neurons_a = [16,32]
+#neurons_b = [64,128]
+#neurons_c = [128,256]
+#padding = ["same"]
+#loss = ["categorical_crossentropy", 'mean_squared_error','categorical_hinge']
 #kernel_sz = [(3,3)]
 
-param_grid = dict(batch_size=batch_size, epochs=epochs, optimizer=optimizer, activation=activation,neurons_a=neurons_a,neurons_b=neurons_b,neurons_c=neurons_c,padding=padding,loss=loss)
-grid = GridSearchCV(estimator=model, param_grid=param_grid,cv=2,verbose = 1)
+#param_grid = dict(batch_size=batch_size, epochs=epochs, optimizer=optimizer, activation=activation,neurons_a=neurons_a,neurons_b=neurons_b,neurons_c=neurons_c,padding=padding,loss=loss)
+#grid = GridSearchCV(estimator=model, param_grid=param_grid,cv=2,verbose = 1)
 
 print("Begin Fit")
-grid_result = grid.fit(X_train, y_train)
+grid_result = model.fit(X_train, y_train)
 
+"""
 print("Best: %f using %s" % (grid_result.best_score_, grid_result.best_params_))
 means = grid_result.cv_results_['mean_test_score']
 stds = grid_result.cv_results_['std_test_score']
 params = grid_result.cv_results_['params']
 for mean, stdev, param in zip(means, stds, params):
     print("%f (%f) with: %r" % (mean, stdev, param))
+"""
 
-#joblib.dump(grid.best_estimator_, 'model.pkl') 
-evaluate_model(grid, X_test, y_test)
+joblib.dump(model, 'model.pkl') 
+evaluate_model(model, X_test, y_test)
