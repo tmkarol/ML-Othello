@@ -22,14 +22,14 @@ from main import GetPossibleMoves, GetPiecesToFlip, FlipPieces
 def create_model(optimizer="Adadelta",activation = "relu", neurons_a = 32, neurons_b = 64, neurons_c = 128, padding = "same", loss = "categorical_crossentropy", kernel_sz = (3,3)):
     #multilayer model of convolutional 3D layers. Takes an (8,8,4) input. Outputs an (8,8,1)
 
-    model = [ Conv2D(neurons_a,kernel_size=kernel_sz, padding = padding, activation=activation, input_shape = (8,8,4)),
+    model = [ Conv2D(neurons_c,kernel_size=kernel_sz, padding = padding, activation=activation, input_shape = (8,8,4)),
+    Conv2D(neurons_c,kernel_size=kernel_sz, padding = padding, activation=activation),
+    Conv2D(neurons_b,kernel_size=kernel_sz, padding = padding, activation=activation),
+    Conv2D(neurons_b,kernel_size=kernel_sz, padding = padding, activation=activation),
     Conv2D(neurons_a,kernel_size=kernel_sz, padding = padding, activation=activation),
     Conv2D(neurons_b,kernel_size=kernel_sz, padding = padding, activation=activation),
     Conv2D(neurons_b,kernel_size=kernel_sz, padding = padding, activation=activation),
-    Conv2D(neurons_c,kernel_size=kernel_sz, padding = padding, activation=activation),
-    Conv2D(neurons_c,kernel_size=kernel_sz, padding = padding, activation=activation),
-    Conv2D(neurons_b,kernel_size=kernel_sz, padding = padding, activation=activation),
-    Conv2D(neurons_a,kernel_size=(1, 1), padding = padding, activation=activation),
+    Conv2D(neurons_c,kernel_size=(1, 1), padding = padding, activation=activation),
     Flatten(),
     Dense(64, activation ='softmax')]
     #Reshape(target_shape=(1,8,8))]
@@ -37,14 +37,14 @@ def create_model(optimizer="Adadelta",activation = "relu", neurons_a = 32, neuro
     cnn_model = Sequential(model)
     cnn_model.summary() #to figure out what is in the model
 
-    cnn_model.compile(optimizer=optimizer, loss=loss, metrics=['accuracy'])
+    cnn_model.compile(optimizer=optimizer, loss=loss, metrics=['mse','accuracy'])
 
     return cnn_model
 
 
 def evaluate_model(model,X_test,y_test):
     score = model.evaluate(X_test,y_test)
-    print(f"\nThe simple model achieves an accuracy of {score[1]*100:.2f}% on the test data.")
+    print(f"\nThe simple model achieves an mse of {score[2]*100:.2f} on the test data.")
 
 
 
@@ -230,7 +230,7 @@ model = create_model()
 #grid = GridSearchCV(estimator=model, param_grid=param_grid,cv=2,verbose = 1)
 
 print("Begin Fit")
-grid_result = model.fit(X_train, y_train, epochs=7, batch_size=100)
+grid_result = model.fit(X_train, y_train, epochs=10, batch_size=100)
 
 """
 print("Best: %f using %s" % (grid_result.best_score_, grid_result.best_params_))
