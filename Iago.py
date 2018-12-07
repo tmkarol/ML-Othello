@@ -44,9 +44,8 @@ def create_model(optimizer="Adadelta",activation = "relu", neurons_a = 32, neuro
 
 def evaluate_model(model,X_test,y_test):
     score = model.evaluate(X_test,y_test)
-    pred = model.predict(X_test[0])
     print(f"\nThe simple model achieves an accuracy of {score[1]*100:.2f}% on the test data.")
-    print(pred)
+
 
 
 '''
@@ -200,7 +199,7 @@ if (not os.path.isfile('WTH_dataset_X.txt')) or (not os.path.isfile('WTH_dataset
 else:
     print("Load data from file")
     X = np.loadtxt('WTH_dataset_X.txt').reshape((271971, 8, 8, 4))
-    y = np.loadtxt('WTH_dataset_y.txt').reshape((271971, 8, 8, 1))
+    y = np.loadtxt('WTH_dataset_y.txt').reshape((271971, 8, 8, 1)).reshape(271971,64)
     X_train = X[:int(.8*X.shape[0])]        
     X_test = X[int(.8*X.shape[0])+1:]
     y_train = y[:int(.8*y.shape[0])]
@@ -212,7 +211,8 @@ else:
 print(X_train.shape)
 print(y_train.shape)
 
-model = KerasClassifier(build_fn=create_model, verbose=0)
+#model = KerasClassifier(build_fn=create_model, verbose=2)
+model = create_model()
 
 # define the grid search parameters
 #batch_size = [1]
@@ -230,7 +230,7 @@ model = KerasClassifier(build_fn=create_model, verbose=0)
 #grid = GridSearchCV(estimator=model, param_grid=param_grid,cv=2,verbose = 1)
 
 print("Begin Fit")
-grid_result = model.fit(X_train, y_train)
+grid_result = model.fit(X_train, y_train, epochs=7, batch_size=100)
 
 """
 print("Best: %f using %s" % (grid_result.best_score_, grid_result.best_params_))
@@ -241,5 +241,6 @@ for mean, stdev, param in zip(means, stds, params):
     print("%f (%f) with: %r" % (mean, stdev, param))
 """
 
-joblib.dump(model, 'model.pkl') 
+model.save("model.h5")
+#joblib.dump(model, 'model.pkl') 
 evaluate_model(model, X_test, y_test)
