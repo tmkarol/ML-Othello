@@ -300,8 +300,8 @@ def LoadModel():
     '''
     Load the saved model
     '''
-    model = keras.models.load_model("trained_model.h5")
-    model.compile(optimizer="SGD", loss="categorical_crossentropy")
+    model = keras.models.load_model("model.h5")
+    #model.compile(optimizer="SGD", loss="categorical_crossentropy")
     return model
     
 def evaluate_AI_move(board, model, player):
@@ -310,16 +310,16 @@ def evaluate_AI_move(board, model, player):
     '''
     # Get the four board state arrays
     legal_moves = GetPossibleMoves(board, player)
-    tempX = np.zeros((4,8,8), int) #same format as final data
-    tempX[0,:,:] = (np.asarray(board) == "B").astype(int)
-    tempX[1,:,:] = (np.asarray(board) == "W").astype(int)
-    tempX[2,:,:] = np.logical_not(np.logical_xor(tempX[0,:,:],tempX[1,:,:]))
+    tempX = np.zeros((8,8,4), int) #same format as final data
+    tempX[:,:,0] = (np.asarray(board) == "B").astype(int)
+    tempX[:,:,1] = (np.asarray(board) == "W").astype(int)
+    tempX[:,:,2] = np.logical_not(np.logical_xor(tempX[:,:,0],tempX[:,:,1]))
     for a in legal_moves:
-        tempX[3,a[1],a[0]] = 1
+        tempX[a[1],a[0],3] = 1
     # Make the descision about the next move
     prediction = model.predict(np.expand_dims(tempX, axis=0))
     mask = []
-    for x in tempX[3,:,:]:
+    for x in tempX[:,:,3]:
         mask.append(x ^ 1)
     masked_predict = np.ma.array(prediction, mask=mask)
     flat_index = masked_predict.argmax(fill_value=0)
