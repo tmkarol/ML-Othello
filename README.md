@@ -18,25 +18,53 @@ WTH_dataset_y.txt - File containing the targets dataset. If this file does not e
 
 model.h5 - The saved, trained model. This file is created in Iago.py and then loaded in main.py in order to make predictions on where the AI should move.
 
+Pipfile - Use this file to set up your environment to run the code.
+
+// TODO: Add more files as necessary
+
 INSTRUCTIONS FOR USE
 --------------------
 
-// TODO: Write this section
+------------------------------------------------------------------------------------------------
 
-How to use this program:
-install pipenv inorder to setup your environment with the following commands:
+SETUP
+
+Install pipenv in order to setup your environment with the following commands:
     pip install pipenv
     pipenv install
     pipenv shell
-Now run your code
 
-File format is the game result followed by the game movelist currently. TODO one hot encoding
-game result is 0 for a tie, -1 for a white win, 1 for a black win
+Next, run the pip file to install dependencies. Note that this code runs on Python 3.6. Please make sure you are running Python 3.6.
+
+------------------------------------------------------------------------------------------------
+
+BUILDING THE MODEL
+
+If you see the file "model.h5" in your directory, you do not need to build the model. The model has already been built and is saved to this file. We do not recommend rebuilding the model as this could take a few hours.
+
+However, if you need to rebuild the model, you need to run Iago.py (python Iago.py). This file will build the data files if they don't already exist or load them if they do. From here, it will use these datasets to train the model. Once the model is trained, it will be saved to "model.h5" where it can be used in the main game.
+
+------------------------------------------------------------------------------------------------
+
+GRIDSEARCH
+
+In the original building of the model, we used GridSearch to find the best parameters for our model. This code still exists in Iago.py, but it is commented out. Since we already found the desired parameters, there is no need to run it again. This is good since the GridSearch took about 28 hours.
+
+------------------------------------------------------------------------------------------------
+
+PLAYING THE GAME
+
+To play the game, run main.py (python main.py). The game will prompt you for what you want to do. Select the option for playing Human vs. AI. This will bring you to the game interface. The game interface is text based. On your turn, you will be asked to select the column you wish to move to (x value) and the row (y value). If your input is a number that does not correspond to a row or column or if you select a space that you cannot move, you will be re-prompted. 
+
+You play white. Black (the AI) will move first. If one player is forced to skip a turn because they have no available moves, the game will handle this by continuing to prompt the appropriate player until the next player can play again. When the game ends, the winner will be displayed.
+
+To quit in the middle of the game, enter any value that is not a number.
+
 
 HOW IT WORKS
 ------------
 
-// TODO: Write this section
+// TODO: Describe a little bit about the code
 
 RESOURCES
 ---------
@@ -44,3 +72,6 @@ RESOURCES
 file format info: http://ledpup.blogspot.com/2012/03/computer-reversi-part-15-thor-database.html
 
 Code for game logic/console interface: https://github.com/patrickfeltes/othello
+
+File format is the game result followed by the game movelist currently. TODO one hot encoding
+game result is 0 for a tie, -1 for a white win, 1 for a black win
