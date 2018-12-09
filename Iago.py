@@ -21,21 +21,19 @@ from tensorflow.keras import Sequential
 
 # This creates the model using Keras. The defaults were set using a gridsearch over each parameter
 # It can be wrapped with a scikit learn wrapper to use with gridsearch
-def create_model(optimizer="Adadelta",activation = "relu", neurons_a = 32, neurons_b = 64, neurons_c = 128, padding = "same", loss = "categorical_crossentropy", kernel_sz = (3,3)):
+def create_model(optimizer="Adadelta",activation = "relu", neurons_a = 32, neurons_b = 64, neurons_c = 128, padding = "same", loss = "categorical_crossentropy", kernel_sz = (2,2)):
     #multilayer model of convolutional 3D layers. Takes an (8,8,4) input. Outputs a flattened (8,8,1) board.
 
-    model = [ Conv2D(neurons_b,kernel_size=kernel_sz, padding = padding, activation=activation, input_shape = (8,8,4)),
+    model = [ Conv2D(neurons_c,kernel_size=(5,5), padding = padding, activation=activation, input_shape = (8,8,4)),
+    Conv2D(neurons_c,kernel_size=(3,3), padding = padding, activation=activation),
+    Conv2D(neurons_b,kernel_size=(3,3), padding = padding, activation=activation),
     Conv2D(neurons_b,kernel_size=kernel_sz, padding = padding, activation=activation),
+    Conv2D(neurons_a,kernel_size=kernel_sz, padding = padding, activation=activation),
+    Conv2D(neurons_a,kernel_size=kernel_sz, padding = padding, activation=activation),
     Conv2D(neurons_b,kernel_size=kernel_sz, padding = padding, activation=activation),
-    Conv2D(neurons_b,kernel_size=kernel_sz, padding = padding, activation=activation),
-    Conv2D(neurons_b,kernel_size=kernel_sz, padding = padding, activation=activation),
-    Conv2D(neurons_b,kernel_size=kernel_sz, padding = padding, activation=activation),
-    Conv2D(neurons_b,kernel_size=kernel_sz, padding = padding, activation=activation),
-    Conv2D(neurons_b,kernel_size=kernel_sz, padding = padding, activation=activation),
-    Conv2D(neurons_b,kernel_size=kernel_sz, padding = padding, activation=activation),
-    Conv2D(neurons_b,kernel_size=kernel_sz, padding = padding, activation=activation),
-    Conv2D(neurons_b,kernel_size=kernel_sz, padding = padding, activation=activation),
-    Conv2D(neurons_b,kernel_size=kernel_sz, padding = padding, activation=activation),
+    Conv2D(neurons_b,kernel_size=(3,3), padding = padding, activation=activation),
+    Conv2D(neurons_c,kernel_size=(3,3), padding = padding, activation=activation),
+    Conv2D(neurons_c,kernel_size=(5,5), padding = padding, activation=activation),
     Flatten(),
     Dense(64, activation ='softmax')]
 
@@ -257,7 +255,7 @@ Function to train a model. This function will create or load new files as necess
 '''
 def train_model():
     # Set the dataset year here:
-    year = 2004
+    year = int(input("Which dataset year? "))
     rawfilename = f"WTH_{year}.wtb"
     parsedfilename = f"WTH_{year}.txt"
     datasetfilenameX = f"WTH_dataset_{year}_X.txt"
