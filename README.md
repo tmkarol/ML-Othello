@@ -16,7 +16,7 @@ WTH_dataset_X.txt - File containing the features dataset. If this file does not 
 
 WTH_dataset_y.txt - File containing the targets dataset. If this file does not exist, data is parsed out of WTH_2004 in Iago.py and the file is created. If this file does exist, the data can simply be loaded in Iago.py next time it is run.
 
-model.h5 - The saved, trained model. This file is created in Iago.py and then loaded in main.py in order to make predictions on where the AI should move.
+saved models (directory) - This folder contains saved, trained models in .h5 format. This file is created in Iago.py and then loaded in main.py in order to make predictions on where the AI should move. 
 
 Pipfile - Use this file to set up your environment to run the code.
 
@@ -54,7 +54,7 @@ In the original building of the model, we used GridSearch to find the best param
 
 PLAYING THE GAME
 
-To play the game, run main.py (python main.py). The game will prompt you for what you want to do. Select the option for playing Human vs. AI. This will bring you to the game interface. The game interface is text based. On your turn, you will be asked to select the column you wish to move to (x value) and the row (y value). If your input is a number that does not correspond to a row or column or if you select a space that you cannot move, you will be re-prompted. 
+To play the game, run main.py (python main.py). The game will prompt you for what you want to do. Select the option for playing Human vs. AI. From here, you will be given a list of the saved models. Type the name of the model you wish to play against (including the file extension) and press enter. You will be re-prompted until you enter a valid option. This will bring you to the game interface. The game interface is text based. On your turn, you will be asked to select the column you wish to move to (x value) and the row (y value). If your input is a number that does not correspond to a row or column or if you select a space that you cannot move, you will be re-prompted. 
 
 You play white. Black (the AI) will move first. If one player is forced to skip a turn because they have no available moves, the game will handle this by continuing to prompt the appropriate player until the next player can play again. When the game ends, the winner will be displayed.
 
