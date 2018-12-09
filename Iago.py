@@ -17,21 +17,25 @@ from tensorflow.keras import Sequential
 #from sklearn.model_selection import GridSearchCV
 
 # Imports from the game
-from main import GetPossibleMoves, GetPiecesToFlip, FlipPieces
+#from main import GetPossibleMoves, GetPiecesToFlip, FlipPieces
 
 # This creates the model using Keras. The defaults were set using a gridsearch over each parameter
 # It can be wrapped with a scikit learn wrapper to use with gridsearch
 def create_model(optimizer="Adadelta",activation = "relu", neurons_a = 32, neurons_b = 64, neurons_c = 128, padding = "same", loss = "categorical_crossentropy", kernel_sz = (3,3)):
     #multilayer model of convolutional 3D layers. Takes an (8,8,4) input. Outputs a flattened (8,8,1) board.
 
-    model = [ Conv2D(neurons_c,kernel_size=(4,4), padding = padding, activation=activation, input_shape = (8,8,4)),
-    Conv2D(neurons_c,kernel_size=kernel_sz, padding = padding, activation=activation),
+    model = [ Conv2D(neurons_b,kernel_size=kernel_sz, padding = padding, activation=activation, input_shape = (8,8,4)),
     Conv2D(neurons_b,kernel_size=kernel_sz, padding = padding, activation=activation),
     Conv2D(neurons_b,kernel_size=kernel_sz, padding = padding, activation=activation),
-    Conv2D(neurons_a,kernel_size=(2,2), padding = padding, activation=activation),
     Conv2D(neurons_b,kernel_size=kernel_sz, padding = padding, activation=activation),
     Conv2D(neurons_b,kernel_size=kernel_sz, padding = padding, activation=activation),
-    Conv2D(neurons_c,kernel_size=(4, 4), padding = padding, activation=activation),
+    Conv2D(neurons_b,kernel_size=kernel_sz, padding = padding, activation=activation),
+    Conv2D(neurons_b,kernel_size=kernel_sz, padding = padding, activation=activation),
+    Conv2D(neurons_b,kernel_size=kernel_sz, padding = padding, activation=activation),
+    Conv2D(neurons_b,kernel_size=kernel_sz, padding = padding, activation=activation),
+    Conv2D(neurons_b,kernel_size=kernel_sz, padding = padding, activation=activation),
+    Conv2D(neurons_b,kernel_size=kernel_sz, padding = padding, activation=activation),
+    Conv2D(neurons_b,kernel_size=kernel_sz, padding = padding, activation=activation),
     Flatten(),
     Dense(64, activation ='softmax')]
 
@@ -245,75 +249,79 @@ def load_wtb_file(filename):
             output.write(' ')
         output.write('\n')
 
-# Set the dataset year here:
-year = 2004
-rawfilename = f"WTH_{year}.wtb"
-parsedfilename = f"WTH_{year}.txt"
-datasetfilenameX = f"WTH_dataset_{year}_X.txt"
-datasetfilenamey = f"WTH_dataset_{year}_y.txt"
-#print(rawfilename)
+'''
+Function to train a model. This function will create or load new files as necessary.
+'''
+def train_model():
+    # Set the dataset year here:
+    year = 2004
+    rawfilename = f"WTH_{year}.wtb"
+    parsedfilename = f"WTH_{year}.txt"
+    datasetfilenameX = f"WTH_dataset_{year}_X.txt"
+    datasetfilenamey = f"WTH_dataset_{year}_y.txt"
+    #print(rawfilename)
 
-# If the dataset does not exist, make them from the raw .txt files
-# If it does just load from file
-if (not os.path.isfile(datasetfilenameX)) or (not os.path.isfile(datasetfilenamey)) or os.stat(datasetfilenameX).st_size == 0 or os.stat(datasetfilenamey).st_size == 0:
-    # If we don't have the parsed movelist, make them from the .wtb files then build.
-    # If we have the parsed move list just build
-    if (not os.path.isfile(parsedfilename)) or os.stat(parsedfilename).st_size == 0:
-        load_wtb_file(rawfilename)
-    
-    print("Building data")
-    X, y= format_data(parsedfilename,datasetfilenameX,datasetfilenamey)
-else:
-    print("Load data from file")
-    X = np.loadtxt(datasetfilenameX).reshape((271971, 8, 8, 4))
-    y = np.loadtxt(datasetfilenamey).reshape((271971, 64))
+    # If the dataset does not exist, make them from the raw .txt files
+    # If it does just load from file
+    if (not os.path.isfile(datasetfilenameX)) or (not os.path.isfile(datasetfilenamey)) or os.stat(datasetfilenameX).st_size == 0 or os.stat(datasetfilenamey).st_size == 0:
+        # If we don't have the parsed movelist, make them from the .wtb files then build.
+        # If we have the parsed move list just build
+        if (not os.path.isfile(parsedfilename)) or os.stat(parsedfilename).st_size == 0:
+            load_wtb_file(rawfilename)
+        
+        print("Building data")
+        X, y= format_data(parsedfilename,datasetfilenameX,datasetfilenamey)
+    else:
+        print("Load data from file")
+        X = np.loadtxt(datasetfilenameX).reshape((271971, 8, 8, 4))
+        y = np.loadtxt(datasetfilenamey).reshape((271971, 64))
 
-    # Make train and test sets with 20% going to testing
-X_train = X[:int(.8*X.shape[0])]        
-X_test = X[int(.8*X.shape[0])+1:]
-y_train = y[:int(.8*y.shape[0])]
-y_test = y[int(.8*y.shape[0])+1:]
+        # Make train and test sets with 20% going to testing
+    X_train = X[:int(.8*X.shape[0])]        
+    X_test = X[int(.8*X.shape[0])+1:]
+    y_train = y[:int(.8*y.shape[0])]
+    y_test = y[int(.8*y.shape[0])+1:]
 
-# We used a reduced dataset while running our grid search
-#X_train = X[:5000]
-#y_train = y[:5000].reshape(5000,64)
+    # We used a reduced dataset while running our grid search
+    #X_train = X[:5000]
+    #y_train = y[:5000].reshape(5000,64)
 
-#print(X_train.shape) # Sanity checks
-#print(y_train.shape)
+    #print(X_train.shape) # Sanity checks
+    #print(y_train.shape)
 
-# We use the KerasClassifier wrapper to implement gridsearch but it is extraneous 
-# for training outside of the grid search because the wrapper cannot use Keras'
-# built in save function.
-#model = KerasClassifier(build_fn=create_model, verbose=2)
+    # We use the KerasClassifier wrapper to implement gridsearch but it is extraneous 
+    # for training outside of the grid search because the wrapper cannot use Keras'
+    # built in save function.
+    #model = KerasClassifier(build_fn=create_model, verbose=2)
 
-# define the grid search parameters
-#batch_size = [1,10]
-#epochs = [1,2,5]
-#optimizer = ["SGD", "Adadelta", "Adam"]
-#activation = ['relu', 'sigmoid']
-#neurons_a = [16,32]
-#neurons_b = [64,128]
-#neurons_c = [128,256]
-#padding = ["same"]
-#loss = ["categorical_crossentropy", 'mean_squared_error','categorical_hinge']
-#kernel_sz = [(3,3)]
+    # define the grid search parameters
+    #batch_size = [1,10]
+    #epochs = [1,2,5]
+    #optimizer = ["SGD", "Adadelta", "Adam"]
+    #activation = ['relu', 'sigmoid']
+    #neurons_a = [16,32]
+    #neurons_b = [64,128]
+    #neurons_c = [128,256]
+    #padding = ["same"]
+    #loss = ["categorical_crossentropy", 'mean_squared_error','categorical_hinge']
+    #kernel_sz = [(3,3)]
 
-#param_grid = dict(batch_size=batch_size, epochs=epochs, optimizer=optimizer, activation=activation,neurons_a=neurons_a,neurons_b=neurons_b,neurons_c=neurons_c,padding=padding,loss=loss)
-#grid = GridSearchCV(estimator=model, param_grid=param_grid,cv=2,verbose = 1)
+    #param_grid = dict(batch_size=batch_size, epochs=epochs, optimizer=optimizer, activation=activation,neurons_a=neurons_a,neurons_b=neurons_b,neurons_c=neurons_c,padding=padding,loss=loss)
+    #grid = GridSearchCV(estimator=model, param_grid=param_grid,cv=2,verbose = 1)
 
-# build model
-model = create_model()
-print("Begin Fit")
-grid_result = model.fit(X_train, y_train, epochs=10, batch_size=100)
+    # build model
+    model = create_model()
+    print("Begin Fit")
+    grid_result = model.fit(X_train, y_train, epochs=10, batch_size=100)
 
 
-#print("Best: %f using %s" % (grid_result.best_score_, grid_result.best_params_))
-#means = grid_result.cv_results_['mean_test_score']
-#stds = grid_result.cv_results_['std_test_score']
-#params = grid_result.cv_results_['params']
-#for mean, stdev, param in zip(means, stds, params):
-#    print("%f (%f) with: %r" % (mean, stdev, param))
+    #print("Best: %f using %s" % (grid_result.best_score_, grid_result.best_params_))
+    #means = grid_result.cv_results_['mean_test_score']
+    #stds = grid_result.cv_results_['std_test_score']
+    #params = grid_result.cv_results_['params']
+    #for mean, stdev, param in zip(means, stds, params):
+    #    print("%f (%f) with: %r" % (mean, stdev, param))
 
-# Finally we test and save our model with it's test score
-score = evaluate_model(model, X_test, y_test)
-model.save(f"model{score}.h5")
+    # Finally we test and save our model with it's test score
+    score = evaluate_model(model, X_test, y_test)
+    model.save(f"model{score:.2f}.h5")

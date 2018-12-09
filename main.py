@@ -1,11 +1,14 @@
+import os.path
 import math
 import tensorflow as tf
 import tensorflow.keras as keras
 import numpy as np
+from Iago import train_model
 
 def PrintBoard(board):
     '''
     Function to print the board's current state, plus the current score.
+    This will be called before each player makes a move.
     '''
     print("  0 1 2 3 4 5 6 7 ")
     for r in range(len(board)):
@@ -21,7 +24,7 @@ def PrintBoard(board):
 
 def GetScore(board):
     '''
-    Function returns both players' current scores.
+    Function returns both players' current scores given the current board state.
     '''
     black = 0
     white = 0
@@ -37,6 +40,7 @@ def GetScore(board):
 def GetPossibleMoves(board, player):
     '''
     Returns a list of all possible moves for a given player.
+    The moves are returned in an array containing all the spaces the player can move.
     '''
     moves = []
 
@@ -51,7 +55,7 @@ def GetPossibleMoves(board, player):
 
 def IsLegalMove(board, r, c, player):
     '''
-    Checks if a space is empty.
+    Checks if a space (r=row, c=column) on the board is empty.
     '''
     return board[r][c] == ' '
 
@@ -204,7 +208,7 @@ def RunNoAI():
 def RunOneAI():
     '''
     Run a game with human vs. AI
-    For demo purposes
+    AI will play black, human will play white.
     '''
     # create 8 by 8 board
     board = []
@@ -276,12 +280,13 @@ def MakeAIMove(board, player, move):
 def PromptGameType():
     '''
     Asks the user how many AI they'd like to use, running the appropriate game afterward
+    Also gives the option to train the model (run function in Iago.py)
     '''
     print("Welcome to OTHELLO AI!")
     print("Type the number for the type of game you'd like to run.")
     print("0: Human vs. Human")
     print("1: Human vs. AI")
-    # print("2: AI vs. AI")
+    print("2: Train the Model")
     choice = -1
     while choice == -1:
         choice = int(input("Your choice: "))
@@ -289,19 +294,24 @@ def PromptGameType():
             RunNoAI()
         elif choice == 1:
             RunOneAI()
-        # elif choice == 2:
-        #    RunTwoAI()
+        elif choice == 2:
+            train_model()
         else:
             print("Please enter a valid choice.")
             choice = -1
-    print("\n") #???
+    print("\n") 
     
 def LoadModel():
     '''
-    Load the saved model
+    Load the saved model from the .h5 model
     '''
-    model = keras.models.load_model("model.h5")
-    #model.compile(optimizer="SGD", loss="categorical_crossentropy")
+    #prompt model name
+    modelname = ""
+    while(not os.path.isfile(modelname)) :
+        modelname = str(input("Which model? "))
+        modelname = f"./saved models/{modelname}.h5"
+    model = keras.models.load_model(modelname)
+
     return model
     
 def evaluate_AI_move(board, model, player):
@@ -328,5 +338,8 @@ def evaluate_AI_move(board, model, player):
     row = flat_index // 8
     return (row * 10) + col
 
-# Run the game!
-#PromptGameType()
+if __name__ == "__main__":
+    # Run the game!
+    # This will only be called if this file is run from the terminal
+    # (ie, not when this module is included in Iago.py)
+    PromptGameType()

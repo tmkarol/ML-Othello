@@ -38,11 +38,11 @@ Next, run the pip file to install dependencies. Note that this code runs on Pyth
 
 ------------------------------------------------------------------------------------------------
 
-BUILDING THE MODEL
+BUILDING/TRAINING THE MODEL
 
 If you see the file "model.h5" in your directory, you do not need to build the model. The model has already been built and is saved to this file. We do not recommend rebuilding the model as this could take a few hours.
 
-However, if you need to rebuild the model, you need to run Iago.py (python Iago.py). This file will build the data files if they don't already exist or load them if they do. From here, it will use these datasets to train the model. Once the model is trained, it will be saved to "model.h5" where it can be used in the main game.
+However, if you need to rebuild the model, you need to run main.py (python main.py). When the menu appears, select (2) Train the Model. This file will build the data files if they don't already exist or load them if they do. From here, it will use these datasets to train the model. Once the model is trained, it will be saved to "model.h5" where it can be used in the main game.
 
 ------------------------------------------------------------------------------------------------
 
