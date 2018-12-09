@@ -329,4 +329,4 @@ def evaluate_AI_move(board, model, player):
     return (row * 10) + col
 
 # Run the game!
-PromptGameType()
+#PromptGameType()
