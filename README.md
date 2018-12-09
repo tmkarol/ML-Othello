@@ -1,5 +1,3 @@
-# ML-Othello
-
 IAGO: THE OTHELLO AI
 ====================
 
@@ -16,11 +14,9 @@ WTH_dataset_X.txt - File containing the features dataset. If this file does not 
 
 WTH_dataset_y.txt - File containing the targets dataset. If this file does not exist, data is parsed out of WTH_2004 in Iago.py and the file is created. If this file does exist, the data can simply be loaded in Iago.py next time it is run.
 
-model.h5 - The saved, trained model. This file is created in Iago.py and then loaded in main.py in order to make predictions on where the AI should move.
+saved models (directory) - This folder contains saved, trained models in .h5 format. This file is created in Iago.py and then loaded in main.py in order to make predictions on where the AI should move. Most models are saved with a name indicating their accuracy score (ie, model39.47.h5 has an accuracy score of 39.47%).
 
 Pipfile - Use this file to set up your environment to run the code.
-
-// TODO: Add more files as necessary
 
 INSTRUCTIONS FOR USE
 --------------------
@@ -40,9 +36,9 @@ Next, run the pip file to install dependencies. Note that this code runs on Pyth
 
 BUILDING/TRAINING THE MODEL
 
-If you see the file "model.h5" in your directory, you do not need to build the model. The model has already been built and is saved to this file. We do not recommend rebuilding the model as this could take a few hours.
+If you see .h5 models in the saved models directory, you do not need to build a model. At leat one model has already been built and is saved to a file. We do not recommend rebuilding the model as this could take a few hours.
 
-However, if you need to rebuild the model, you need to run main.py (python main.py). When the menu appears, select (2) Train the Model. This file will build the data files if they don't already exist or load them if they do. From here, it will use these datasets to train the model. Once the model is trained, it will be saved to "model.h5" where it can be used in the main game.
+However, if you need to rebuild the model, you need to run main.py (python main.py). When the menu appears, select (2) Train the Model. This file will build the data files if they don't already exist or load them if they do. From here, it will use these datasets to train the model. Once the model is trained, it will be saved to "model[score].h5" where it can be used in the main game.
 
 ------------------------------------------------------------------------------------------------
 
@@ -52,19 +48,19 @@ In the original building of the model, we used GridSearch to find the best param
 
 ------------------------------------------------------------------------------------------------
 
+EVALUATING THE MODEL
+
+Each model is evaluated using the test dataset after it is trained. Once the training completes, the evaluate_model function is called in Iago.py. This will print the model's accuracy score. The accuracy score will then be used as part of the model name in the save file so it can be identified later.
+
+------------------------------------------------------------------------------------------------
+
 PLAYING THE GAME
 
-To play the game, run main.py (python main.py). The game will prompt you for what you want to do. Select the option for playing Human vs. AI. This will bring you to the game interface. The game interface is text based. On your turn, you will be asked to select the column you wish to move to (x value) and the row (y value). If your input is a number that does not correspond to a row or column or if you select a space that you cannot move, you will be re-prompted. 
+To play the game, run main.py (python main.py). The game will prompt you for what you want to do. Select the option for playing Human vs. AI. From here, you will be given a list of the saved models. Type the name of the model you wish to play against (including the file extension) and press enter. You will be re-prompted until you enter a valid option. This will bring you to the game interface. The game interface is text based. On your turn, you will be asked to select the column you wish to move to (x value) and the row (y value). If your input is a number that does not correspond to a row or column or if you select a space that you cannot move, you will be re-prompted. 
 
 You play white. Black (the AI) will move first. If one player is forced to skip a turn because they have no available moves, the game will handle this by continuing to prompt the appropriate player until the next player can play again. When the game ends, the winner will be displayed.
 
 To quit in the middle of the game, enter any value that is not a number.
-
-
-HOW IT WORKS
-------------
-
-// TODO: Describe a little bit about the code
 
 RESOURCES
 ---------
