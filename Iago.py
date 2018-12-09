@@ -62,6 +62,9 @@ def evaluate_model(model,X_test,y_test):
 # Layer 2: 1 free else 0
 # Layer 3: 1 legal else 0
 def format_data(filename, outfileX, outfiley):
+
+    from main import GetPossibleMoves, GetPiecesToFlip, FlipPieces
+    
     # Open our reading and writing files
     dataset = open(filename, "rb")
     output_X = open(outfileX,"w")

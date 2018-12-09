@@ -3,7 +3,7 @@ import math
 import tensorflow as tf
 import tensorflow.keras as keras
 import numpy as np
-from Iago import train_model
+from Iago import train_model, evaluate_model, format_data
 
 def PrintBoard(board):
     '''
@@ -288,7 +288,8 @@ def PromptGameType():
         print("0: Human vs. Human")
         print("1: Human vs. AI")
         print("2: Train the Model")
-        print("3: Quit the Program")
+        print("3: Score a Model")
+        print("4: Quit the Program")
         choice = int(input("Your choice: "))
         if choice == 0:
             print("")
@@ -300,6 +301,9 @@ def PromptGameType():
             print("")
             train_model()
         elif choice == 3:
+            print("")
+            score_model()
+        elif choice == 4:
             print("")
             break
         else:
@@ -314,9 +318,13 @@ def LoadModel():
     #prompt model name
     modelname = ""
     print("Your saved models:")
+    models = os.listdir("./saved models")
+    if len(models) < 1:
+        print("Error: You do not have any saved models.")
+        return
     print(os.listdir("./saved models"))
     print("")
-    print("Type the full name of the model you wish to play (no quotes).")
+    print("Type the full name of the model you wish to use (no quotes).")
     while(not os.path.isfile(modelname)) :
         modelname = str(input("Which model? "))
         modelname = f"./saved models/{modelname}"
@@ -347,6 +355,31 @@ def evaluate_AI_move(board, model, player):
     col = flat_index % 8
     row = flat_index // 8
     return (row * 10) + col
+
+def score_model():
+
+    # Open the data files, if they exist
+    if (not os.path.isfile("WTH_dataset_2004_X.txt")) or (not os.path.isfile("WTH_dataset_2004_y.txt")) or os.stat("WTH_dataset_2004_X.txt").st_size == 0 or os.stat("WTH_dataset_2004_y.txt").st_size == 0:
+        if (not os.path.isfile("WTH_2004.txt")) or os.stat("WTH_2004.txt").st_size == 0:
+            load_wtb_file("WTH_2004.wtb")
+        
+        print("Building data...")
+        X, y= format_data("WTH_2004.txt", "WTH_dataset_2004_X.txt", "WTH_dataset_2004_y.txt")
+    else:
+        print("Loading data from file...")
+        X = np.loadtxt("WTH_dataset_2004_X.txt").reshape((271971, 8, 8, 4))
+        y = np.loadtxt("WTH_dataset_2004_y.txt").reshape((271971, 64))
+
+    # Get the test data       
+    X_test = X[int(.8*X.shape[0])+1:]
+    y_test = y[int(.8*y.shape[0])+1:]
+
+    # Get the model
+    model = LoadModel()
+
+    # Evaluate
+    evaluate_model(model, X_test, y_test)
+
 
 if __name__ == "__main__":
     # Run the game!

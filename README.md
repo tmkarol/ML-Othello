@@ -10,9 +10,9 @@ Iago.py - This file includes functions for loading in data from the original dat
 
 WTH_2004.txt - The original dataset we used. Includes data from several professional Othello games from 2004. Games are stored with who won the game and each of the moves made in the game. This file is written in binary.
 
-WTH_dataset_X.txt - File containing the features dataset. If this file does not exist, data is parsed out of WTH_2004 in Iago.py and the file is created. If this file does exist, the data can simply be loaded in Iago.py next time it is run.
+WTH_dataset_X.txt - File containing the features dataset. If this file does not exist, data is parsed out of WTH_2004 in Iago.py and the file is created. If this file does exist, the data will be loaded when it is needed for training or evaluating.
 
-WTH_dataset_y.txt - File containing the targets dataset. If this file does not exist, data is parsed out of WTH_2004 in Iago.py and the file is created. If this file does exist, the data can simply be loaded in Iago.py next time it is run.
+WTH_dataset_y.txt - File containing the targets dataset. If this file does not exist, data is parsed out of WTH_2004 in Iago.py and the file is created. If this file does exist, the data will be loaded when it is needed for training or evaluating.
 
 saved models (directory) - This folder contains saved, trained models in .h5 format. This file is created in Iago.py and then loaded in main.py in order to make predictions on where the AI should move. Most models are saved with a name indicating their accuracy score (ie, model39.47.h5 has an accuracy score of 39.47%).
 
@@ -50,7 +50,13 @@ In the original building of the model, we used GridSearch to find the best param
 
 EVALUATING THE MODEL
 
-Each model is evaluated using the test dataset after it is trained. Once the training completes, the evaluate_model function is called in Iago.py. This will print the model's accuracy score. The accuracy score will then be used as part of the model name in the save file so it can be identified later.
+Without Training:
+
+If you would like to evaluate a model that has already been trained, run main.py (python main.py) and select option 3 in the menu for evaluating a model. Once this is selected, the dataset will first be loaded so that the test data can be gathered. If the dataset file does not exist yet, it will be created. If it does exist, the data will be loaded. This portion can take a few minutes to run. After the data has been prepared, you will be asked to select a model to evaluate. Type in the full name of the model (including the file extension) to evaluate it. The accuracy score will be printed to the console.
+
+After Training:
+
+Each model is automatically evaluated using the test dataset after it is trained. Once the training completes, the evaluate_model function is called in Iago.py. This will print the model's accuracy score. The accuracy score will then be used as part of the model name in the save file so it can be identified later.
 
 ------------------------------------------------------------------------------------------------
 
