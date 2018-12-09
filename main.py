@@ -283,23 +283,29 @@ def PromptGameType():
     Also gives the option to train the model (run function in Iago.py)
     '''
     print("Welcome to OTHELLO AI!")
-    print("Type the number for the type of game you'd like to run.")
-    print("0: Human vs. Human")
-    print("1: Human vs. AI")
-    print("2: Train the Model")
-    choice = -1
-    while choice == -1:
+    while True:
+        print("Type the number that corresponds to your choice.")
+        print("0: Human vs. Human")
+        print("1: Human vs. AI")
+        print("2: Train the Model")
+        print("3: Quit the Program")
         choice = int(input("Your choice: "))
         if choice == 0:
+            print("")
             RunNoAI()
         elif choice == 1:
+            print("")
             RunOneAI()
         elif choice == 2:
+            print("")
             train_model()
+        elif choice == 3:
+            print("")
+            break
         else:
             print("Please enter a valid choice.")
-            choice = -1
-    print("\n") 
+        print("\n") 
+    print("Goodbye!")
     
 def LoadModel():
     '''
@@ -307,9 +313,13 @@ def LoadModel():
     '''
     #prompt model name
     modelname = ""
+    print("Your saved models:")
+    print(os.listdir("./saved models"))
+    print("")
+    print("Type the full name of the model you wish to play (no quotes).")
     while(not os.path.isfile(modelname)) :
         modelname = str(input("Which model? "))
-        modelname = f"./saved models/{modelname}.h5"
+        modelname = f"./saved models/{modelname}"
     model = keras.models.load_model(modelname)
 
     return model
