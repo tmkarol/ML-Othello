@@ -1,5 +1,5 @@
 *.wtb
 WTH_dataset_X.txt
 WTH_dataset_y.txt
-WTH_dataset_2004_X.txt
-WTH_dataset_2004_y.txt
+WTH_dataset_*
+WTH_dataset_*

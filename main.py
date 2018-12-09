@@ -3,7 +3,6 @@ import math
 import tensorflow as tf
 import tensorflow.keras as keras
 import numpy as np
-from Iago import train_model
 
 def PrintBoard(board):
     '''
@@ -298,6 +297,7 @@ def PromptGameType():
             RunOneAI()
         elif choice == 2:
             print("")
+            from Iago import train_model
             train_model()
         elif choice == 3:
             print("")
@@ -324,7 +324,7 @@ def LoadModel():
     model.summary()
 
     return model
-    
+
 def evaluate_AI_move(board, model, player):
     '''
     Get a move from the AI and return it as a usable move for this format

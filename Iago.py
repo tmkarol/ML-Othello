@@ -21,18 +21,18 @@ from tensorflow.keras import Sequential
 
 # This creates the model using Keras. The defaults were set using a gridsearch over each parameter
 # It can be wrapped with a scikit learn wrapper to use with gridsearch
-def create_model(optimizer="Adadelta",activation = "relu", neurons_a = 32, neurons_b = 64, neurons_c = 128, padding = "same", loss = "categorical_crossentropy", kernel_sz = (2,2)):
+def create_model(optimizer="Adadelta",activation = "relu", neurons_a = 32, neurons_b = 64, neurons_c = 128, padding = "same", loss = "categorical_crossentropy", kernel_sz = (3,3)):
     #multilayer model of convolutional 3D layers. Takes an (8,8,4) input. Outputs a flattened (8,8,1) board.
 
     model = [ Conv2D(neurons_c,kernel_size=(5,5), padding = padding, activation=activation, input_shape = (8,8,4)),
-    Conv2D(neurons_c,kernel_size=(3,3), padding = padding, activation=activation),
-    Conv2D(neurons_b,kernel_size=(3,3), padding = padding, activation=activation),
+    Conv2D(neurons_c,kernel_size=kernel_sz, padding = padding, activation=activation),
+    Conv2D(neurons_b,kernel_size=kernel_sz, padding = padding, activation=activation),
     Conv2D(neurons_b,kernel_size=kernel_sz, padding = padding, activation=activation),
     Conv2D(neurons_a,kernel_size=kernel_sz, padding = padding, activation=activation),
     Conv2D(neurons_a,kernel_size=kernel_sz, padding = padding, activation=activation),
     Conv2D(neurons_b,kernel_size=kernel_sz, padding = padding, activation=activation),
-    Conv2D(neurons_b,kernel_size=(3,3), padding = padding, activation=activation),
-    Conv2D(neurons_c,kernel_size=(3,3), padding = padding, activation=activation),
+    Conv2D(neurons_b,kernel_size=kernel_sz, padding = padding, activation=activation),
+    Conv2D(neurons_c,kernel_size=kernel_sz, padding = padding, activation=activation),
     Conv2D(neurons_c,kernel_size=(5,5), padding = padding, activation=activation),
     Flatten(),
     Dense(64, activation ='softmax')]
@@ -164,12 +164,13 @@ def format_data(filename, outfileX, outfiley):
 
     X = np.asarray(X)
     y = np.asarray(y)
-
+    
     # save everything
-    # open with np.loadtxt('WTH_dataset_X.txt').reshape((271971, 8, 8, 4))
+    # open with np.loadtxt('WTH_dataset_X.txt').reshape((#samples, 8, 8, 4))
     # I'm writing a header here just for the sake of readability
     # Any line starting with "#" will be ignored by numpy.loadtxt
-    output_X.write('# Data shape: {0}\n'.format(X.shape))
+    output_X.write('#'+str(len(X)))
+    output_X.write('\n# Data shape: {0}\n'.format(X.shape))
     for sample in X:
         for sample_slice in sample:
             np.savetxt(output_X, sample_slice, fmt='%d')
@@ -179,8 +180,9 @@ def format_data(filename, outfileX, outfiley):
         output_X.write('# New sample\n')
 
     # Save y with the same format
-    # open with np.loadtxt('WTH_dataset_X.txt').reshape((271971, 8, 8, 1))
-    output_y.write('# Data shape: {0}\n'.format(y.shape))
+    # open with np.loadtxt('WTH_dataset_{year}_y.txt').reshape((len(y), 8, 8, 1))
+    output_y.write('#'+str(len(y)))
+    output_y.write('\n# Data shape: {0}\n'.format(y.shape))
     
     for sample in y:
         for sample_slice in sample:
@@ -188,8 +190,7 @@ def format_data(filename, outfileX, outfiley):
             output_y.write('# New slice\n')
         output_y.write('# New sample\n')
 
-    y = y.reshape(271971, 64)
-    # Split X and y into train and test
+    y = y.reshape(len(y), 64)
 
     return X, y
 
@@ -247,32 +248,34 @@ def load_wtb_file(filename):
             output.write(' ')
         output.write('\n')
 
-'''
-Function to train a model. This function will create or load new files as necessary.
-'''
-def train_model():
-    # Set the dataset year here:
-    year = int(input("Which dataset year? "))
+def load_dataset(year):
     rawfilename = f"WTH_{year}.wtb"
     parsedfilename = f"WTH_{year}.txt"
     datasetfilenameX = f"WTH_dataset_{year}_X.txt"
     datasetfilenamey = f"WTH_dataset_{year}_y.txt"
-    #print(rawfilename)
-
     # If the dataset does not exist, make them from the raw .txt files
     # If it does just load from file
     if (not os.path.isfile(datasetfilenameX)) or (not os.path.isfile(datasetfilenamey)) or os.stat(datasetfilenameX).st_size == 0 or os.stat(datasetfilenamey).st_size == 0:
         # If we don't have the parsed movelist, make them from the .wtb files then build.
         # If we have the parsed move list just build
         if (not os.path.isfile(parsedfilename)) or os.stat(parsedfilename).st_size == 0:
+            print("Building .txt from .wtb")
             load_wtb_file(rawfilename)
         
-        print("Building data")
+        print("Building dataset from .txt")
         X, y= format_data(parsedfilename,datasetfilenameX,datasetfilenamey)
     else:
         print("Load data from file")
-        X = np.loadtxt(datasetfilenameX).reshape((271971, 8, 8, 4))
-        y = np.loadtxt(datasetfilenamey).reshape((271971, 64))
+        X = open(datasetfilenameX)
+        szx = int(X.readline()[1:])
+        X.close()
+        y = open(datasetfilenamey)
+        szy = int(y.readline()[1:])
+        y.close()
+        print(f"Loading {szx} features and targets, please wait.")
+
+        X = np.loadtxt(datasetfilenameX).reshape((szx, 8, 8, 4))
+        y = np.loadtxt(datasetfilenamey).reshape((szy, 64))
 
         # Make train and test sets with 20% going to testing
     X_train = X[:int(.8*X.shape[0])]        
@@ -283,6 +286,16 @@ def train_model():
     # We used a reduced dataset while running our grid search
     #X_train = X[:5000]
     #y_train = y[:5000].reshape(5000,64)
+
+    return X_train,y_train,X_test,y_test
+'''
+Function to train a model. This function will create or load new files as necessary.
+'''
+def train_model():
+    # Set the dataset year here:
+    year = int(input("Which dataset year? "))
+
+    X_train,y_train,X_test,y_test = load_dataset(year)
 
     #print(X_train.shape) # Sanity checks
     #print(y_train.shape)
@@ -323,3 +336,5 @@ def train_model():
     # Finally we test and save our model with it's test score
     score = evaluate_model(model, X_test, y_test)
     model.save(f"model{score:.2f}.h5")
+
+from main import GetPossibleMoves, GetPiecesToFlip, FlipPieces
