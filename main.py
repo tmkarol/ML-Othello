@@ -311,6 +311,7 @@ def LoadModel():
         modelname = str(input("Which model? "))
         modelname = f"./saved models/{modelname}.h5"
     model = keras.models.load_model(modelname)
+    model.summary()
 
     return model
     
