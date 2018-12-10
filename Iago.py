@@ -48,7 +48,9 @@ def create_model(optimizer="Adadelta",activation = "relu", neurons_a = 32, neuro
 # This tests the models performance after training
 def evaluate_model(model,X_test,y_test):
     score = model.evaluate(X_test,y_test)
-    print(f"\nThe simple model achieves an mse of {score[2]*100:.2f} on the test data.")
+    print(score)
+    print(f"\nThe simple model achieves an mse of {score[1]:.2f} on the test data.")
+    print(f"\nThe simple model achieves an accuracy of {score[2]*100:.2f} on the test data.")
     return score[2]*100
 
 # This function takes a .txt file full of move sequences and converts it into (8,8,4) board state arrays.
@@ -60,6 +62,9 @@ def evaluate_model(model,X_test,y_test):
 # Layer 2: 1 free else 0
 # Layer 3: 1 legal else 0
 def format_data(filename, outfileX, outfiley):
+
+    from main import GetPossibleMoves, GetPiecesToFlip, FlipPieces
+    
     # Open our reading and writing files
     dataset = open(filename, "rb")
     output_X = open(outfileX,"w")
@@ -180,7 +185,7 @@ def format_data(filename, outfileX, outfiley):
         output_X.write('# New sample\n')
 
     # Save y with the same format
-    # open with np.loadtxt('WTH_dataset_{year}_y.txt').reshape((len(y), 8, 8, 1))
+    # open with np.loadtxt('WTH_dataset_{year}_y.txt').reshape((len(y),64))
     output_y.write('#'+str(len(y)))
     output_y.write('\n# Data shape: {0}\n'.format(y.shape))
     
@@ -336,5 +341,3 @@ def train_model():
     # Finally we test and save our model with it's test score
     score = evaluate_model(model, X_test, y_test)
     model.save(f"model{score:.2f}.h5")
-
-from main import GetPossibleMoves, GetPiecesToFlip, FlipPieces
