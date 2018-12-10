@@ -71,7 +71,7 @@ To quit in the middle of the game, enter any value that is not a number.
 RESOURCES
 ---------
 
-file format info: http://ledpup.blogspot.com/2012/03/computer-reversi-part-15-thor-database.html
+file format info: http://cassio.free.fr/cassio/custom_install/database/FORMAT_WTHOR.TXT
 
 Code for game logic/console interface: https://github.com/patrickfeltes/othello
 
