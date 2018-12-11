@@ -1,4 +1,5 @@
 *.wtb
+*.zip
 WTH_dataset_X.txt
 WTH_dataset_y.txt
 WTH_dataset_*

@@ -14,7 +14,7 @@ WTH_dataset_X.txt - File containing the features dataset. If this file does not 
 
 WTH_dataset_y.txt - File containing the targets dataset. If this file does not exist, data is parsed out of WTH_2004 in Iago.py and the file is created. If this file does exist, the data will be loaded when it is needed for training or evaluating.
 
-saved models (directory) - This folder contains saved, trained models in .h5 format. This file is created in Iago.py and then loaded in main.py in order to make predictions on where the AI should move. Most models are saved with a name indicating their accuracy score (ie, model39.47.h5 has an accuracy score of 39.47%).
+saved models (directory) - This folder contains saved, trained models in .h5 format. This file is created in Iago.py and then loaded in main.py in order to make predictions on where the AI should move. Most models are saved with a name indicating their accuracy score from the original training (ie, model39.47.h5 had an accuracy score of 39.47% on the train data). To get accuratly score a model on the test data please run the model with option 3 from the start menu.
 
 Pipfile - Use this file to set up your environment to run the code.
 
